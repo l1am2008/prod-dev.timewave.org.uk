@@ -8,7 +8,6 @@ export async function GET() {
     const currentTime = now.toTimeString().slice(0, 8)
     const threeHoursFromNow = new Date(now.getTime() + 3 * 60 * 60 * 1000)
 
-    // Query for upcoming shows in the next 3 hours
     const upcomingShows: any[] = await query(
       `SELECT 
         s.id, s.title, s.description, s.day_of_week, s.start_time, s.end_time,
@@ -17,6 +16,7 @@ export async function GET() {
       INNER JOIN users u ON s.user_id = u.id
       WHERE s.is_active = TRUE
         AND s.is_recurring = TRUE
+        AND s.approval_status = 'approved'
         AND s.day_of_week = ?
         AND s.start_time >= ?
         AND s.start_time <= TIME(?)

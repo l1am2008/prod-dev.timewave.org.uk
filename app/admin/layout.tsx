@@ -1,19 +1,33 @@
+"use client"
+
 import type React from "react"
-import type { Metadata } from "next"
+import { useEffect } from "react"
+import { useRouter, usePathname } from "next/navigation"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Users, Mail, Settings, LayoutDashboard } from "lucide-react"
-
-export const metadata: Metadata = {
-  title: "Admin Portal - Timewave Radio",
-  description: "Manage users, staff, and content",
-}
 
 export default function AdminLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  const router = useRouter()
+  const pathname = usePathname()
+
+  useEffect(() => {
+    if (pathname !== "/admin/login") {
+      const token = localStorage.getItem("admin_token")
+      if (!token) {
+        router.push("/admin/login")
+      }
+    }
+  }, [pathname, router])
+
+  if (pathname === "/admin/login") {
+    return <>{children}</>
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b border-border bg-card">

@@ -22,7 +22,7 @@ sudo apt-get install -y mysql-client
 
 \`\`\`bash
 # Navigate to your project directory
-cd /var/www/timewave-radio
+cd ~/prod-dev.timewave.org.uk
 
 # Install dependencies
 npm install
@@ -43,14 +43,29 @@ npm run setup-db
 npm run create-admin admin@timewave.uk admin YourSecurePassword123
 \`\`\`
 
-### 4. Build and Start
+### 4. Build the Application
+
+**IMPORTANT:** You must build before starting with PM2:
 
 \`\`\`bash
-# Build the application
 npm run build
+\`\`\`
 
-# Start with PM2
-pm2 start ecosystem.config.js
+This creates the `.next` directory that PM2 needs to run the production server.
+
+### 5. Start with PM2
+
+**Without ecosystem.config.js - Direct PM2 command:**
+
+\`\`\`bash
+# Start directly with PM2 (bypassing ecosystem.config.js)
+pm2 start npm --name "timewave-radio" -- start
+
+# Set working directory
+cd ~/prod-dev.timewave.org.uk
+
+# Or with full options:
+pm2 start npm --name "timewave-radio" --cwd ~/prod-dev.timewave.org.uk -- start
 
 # Save PM2 configuration
 pm2 save
@@ -60,7 +75,14 @@ pm2 startup
 # Run the command it outputs
 \`\`\`
 
-### 5. Setup Cron Job
+**Alternative: Using ecosystem.config.js:**
+
+\`\`\`bash
+pm2 start ecosystem.config.js
+pm2 save
+\`\`\`
+
+### 6. Setup Cron Job
 
 \`\`\`bash
 # Open crontab
@@ -70,7 +92,7 @@ crontab -e
 * * * * * curl -X POST http://localhost:3030/api/cron/live-detector -H "Authorization: Bearer YOUR_CRON_SECRET" > /dev/null 2>&1
 \`\`\`
 
-### 6. Open Firewall (if needed)
+### 7. Open Firewall (if needed)
 
 \`\`\`bash
 sudo ufw allow 3030
@@ -93,6 +115,13 @@ Your cPanel MySQL needs to allow connections from your Ubuntu server:
 4. Save changes
 
 ## Common Issues
+
+**PM2 shows "No such file or directory" error?**
+\`\`\`bash
+# You forgot to build! Run:
+npm run build
+pm2 restart timewave-radio
+\`\`\`
 
 **Can't connect to database?**
 \`\`\`bash

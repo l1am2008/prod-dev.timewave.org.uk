@@ -1,69 +1,154 @@
 import nodemailer from "nodemailer"
 
-const transporter = nodemailer.createTransporter({
-  host: process.env.SMTP_HOST,
-  port: Number.parseInt(process.env.SMTP_PORT || "587"),
-  secure: process.env.SMTP_SECURE === "true",
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASSWORD,
-  },
-  from: "website@timewave.uk",
-})
+let transporter: nodemailer.Transporter | null = null
+
+function getTransporter() {
+  // Check if SMTP is configured
+  const smtpHost = process.env.SMTP_HOST
+  const smtpPort = process.env.SMTP_PORT
+  const smtpUser = process.env.SMTP_USER
+  const smtpPassword = process.env.SMTP_PASSWORD
+
+  if (!smtpHost || !smtpPort || !smtpUser || !smtpPassword) {
+    console.log("[v0] SMTP not configured, skipping email")
+    return null
+  }
+
+  if (!transporter) {
+    try {
+      transporter = nodemailer.createTransport({
+        host: smtpHost,
+        port: Number.parseInt(smtpPort),
+        secure: Number.parseInt(smtpPort) === 465, // true for 465, false for other ports
+        auth: {
+          user: smtpUser,
+          pass: smtpPassword,
+        },
+        connectionTimeout: 5000, // 5 seconds
+        greetingTimeout: 5000,
+        socketTimeout: 10000,
+        tls: {
+          rejectUnauthorized: false, // Allow self-signed certificates
+        },
+      })
+      console.log("[v0] SMTP transporter created successfully")
+    } catch (error) {
+      console.error("[v0] Failed to create SMTP transporter:", error)
+      return null
+    }
+  }
+
+  return transporter
+}
 
 export async function sendVerificationEmail(email: string, token: string, username: string) {
-  const verificationUrl = `${process.env.NEXT_PUBLIC_APP_URL}/verify-email?token=${token}`
+  const transport = getTransporter()
 
-  await transporter.sendMail({
-    from: '"Timewave Radio" <website@timewave.uk>',
-    to: email,
-    subject: "Verify your Timewave Radio account",
-    html: `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <h1>Welcome to Timewave Radio, ${username}!</h1>
-        <p>Thank you for registering. Please verify your email address by clicking the button below:</p>
-        <a href="${verificationUrl}" style="display: inline-block; padding: 12px 24px; background: #3b82f6; color: white; text-decoration: none; border-radius: 6px; margin: 20px 0;">
-          Verify Email
-        </a>
-        <p>Or copy this link into your browser:</p>
-        <p style="color: #666; font-size: 14px;">${verificationUrl}</p>
-        <p style="color: #999; font-size: 12px; margin-top: 40px;">
-          If you didn't create this account, please ignore this email.
-        </p>
-      </div>
-    `,
-  })
+  if (!transport) {
+    console.log("[v0] Skipping verification email - SMTP not configured")
+    return
+  }
+
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3030"
+  const verificationUrl = `${appUrl}/verify-email?token=${token}`
+
+  try {
+    await transport.sendMail({
+      from: `"Timewave Radio" <${process.env.SMTP_USER}>`,
+      to: email,
+      subject: "Verify your Timewave Radio account",
+      html: `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <style>
+              body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+              .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+              .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+              .content { background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px; }
+              .button { display: inline-block; padding: 12px 30px; background: #667eea; color: white; text-decoration: none; border-radius: 5px; margin: 20px 0; }
+              .footer { text-align: center; margin-top: 20px; color: #666; font-size: 12px; }
+            </style>
+          </head>
+          <body>
+            <div class="container">
+              <div class="header">
+                <h1>Welcome to Timewave Radio!</h1>
+              </div>
+              <div class="content">
+                <p>Hi ${username},</p>
+                <p>Thank you for registering with Timewave Radio. Please verify your email address to activate your account.</p>
+                <p style="text-align: center;">
+                  <a href="${verificationUrl}" class="button">Verify Email Address</a>
+                </p>
+                <p>Or copy and paste this link into your browser:</p>
+                <p style="word-break: break-all; color: #667eea;">${verificationUrl}</p>
+                <p>If you didn't create this account, you can safely ignore this email.</p>
+              </div>
+              <div class="footer">
+                <p>&copy; ${new Date().getFullYear()} Timewave Radio. All rights reserved.</p>
+              </div>
+            </div>
+          </body>
+        </html>
+      `,
+    })
+    console.log("[v0] Verification email sent successfully to:", email)
+  } catch (error) {
+    console.error("[v0] Failed to send verification email:", error)
+    throw error
+  }
 }
 
-export async function sendPasswordResetEmail(email: string, token: string) {
-  const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL}/reset-password?token=${token}`
+export async function sendNewsletterEmail(subscribers: string[], subject: string, content: string) {
+  const transport = getTransporter()
 
-  await transporter.sendMail({
-    from: '"Timewave Radio" <website@timewave.uk>',
-    to: email,
-    subject: "Reset your Timewave Radio password",
-    html: `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <h1>Password Reset Request</h1>
-        <p>You requested to reset your password. Click the button below to proceed:</p>
-        <a href="${resetUrl}" style="display: inline-block; padding: 12px 24px; background: #3b82f6; color: white; text-decoration: none; border-radius: 6px; margin: 20px 0;">
-          Reset Password
-        </a>
-        <p>Or copy this link into your browser:</p>
-        <p style="color: #666; font-size: 14px;">${resetUrl}</p>
-        <p style="color: #999; font-size: 12px; margin-top: 40px;">
-          If you didn't request this, please ignore this email. The link will expire in 1 hour.
-        </p>
-      </div>
-    `,
-  })
-}
+  if (!transport) {
+    console.log("[v0] Skipping newsletter email - SMTP not configured")
+    return
+  }
 
-export async function sendNewsletterEmail(emails: string[], subject: string, content: string) {
-  await transporter.sendMail({
-    from: '"Timewave Radio" <website@timewave.uk>',
-    bcc: emails,
-    subject,
-    html: content,
-  })
+  try {
+    const mailPromises = subscribers.map((email) =>
+      transport.sendMail({
+        from: `"Timewave Radio" <${process.env.SMTP_USER}>`,
+        to: email,
+        subject: subject,
+        html: `
+          <!DOCTYPE html>
+          <html>
+            <head>
+              <style>
+                body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+                .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+                .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+                .content { background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px; }
+                .footer { text-align: center; margin-top: 20px; color: #666; font-size: 12px; }
+              </style>
+            </head>
+            <body>
+              <div class="container">
+                <div class="header">
+                  <h1>Timewave Radio Newsletter</h1>
+                </div>
+                <div class="content">
+                  ${content}
+                </div>
+                <div class="footer">
+                  <p>&copy; ${new Date().getFullYear()} Timewave Radio. All rights reserved.</p>
+                  <p><a href="${process.env.NEXT_PUBLIC_APP_URL}/unsubscribe">Unsubscribe</a></p>
+                </div>
+              </div>
+            </body>
+          </html>
+        `,
+      }),
+    )
+
+    await Promise.all(mailPromises)
+    console.log("[v0] Newsletter sent to", subscribers.length, "subscribers")
+  } catch (error) {
+    console.error("[v0] Failed to send newsletter:", error)
+    throw error
+  }
 }

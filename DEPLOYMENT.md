@@ -23,11 +23,11 @@ sudo apt-get install -y build-essential
 
 ## Step 2: Upload Project Files
 
-Upload your project to your Ubuntu server (e.g., `/var/www/timewave-radio`)
+Upload your project to your Ubuntu server (e.g., `~/prod-dev.timewave.org.uk`)
 
 \`\`\`bash
 # Navigate to your project directory
-cd /var/www/timewave-radio
+cd ~/prod-dev.timewave.org.uk
 
 # Install dependencies
 npm install
@@ -90,12 +90,41 @@ mysql -h liamradford.me -u liamradf_timewaveradio -p liamradf_timewaveradio < sc
 
 ## Step 5: Build the Application
 
+**IMPORTANT:** You must build the Next.js application before starting it with PM2.
+
 \`\`\`bash
-# Build the Next.js application
 npm run build
 \`\`\`
 
+This command:
+- Creates the optimized production build in `.next` directory
+- Compiles all TypeScript to JavaScript
+- Optimizes assets and images
+- Generates static pages where possible
+
+**Note:** If this fails, check the error messages and ensure all environment variables are set correctly in `.env.local`.
+
 ## Step 6: Start with PM2
+
+You have two options to start the application:
+
+### Option A: Direct PM2 Command (No Config File Needed)
+
+\`\`\`bash
+cd ~/prod-dev.timewave.org.uk
+
+# Start with PM2 directly
+pm2 start npm --name "timewave-radio" --cwd ~/prod-dev.timewave.org.uk -- start
+
+# Save PM2 configuration
+pm2 save
+
+# Setup PM2 to start on system boot
+pm2 startup
+# Follow the command it outputs (usually a sudo command)
+\`\`\`
+
+### Option B: Using ecosystem.config.js
 
 \`\`\`bash
 # Start the application with PM2
@@ -107,6 +136,15 @@ pm2 save
 # Setup PM2 to start on system boot
 pm2 startup
 # Follow the command it outputs (usually a sudo command)
+\`\`\`
+
+**Both methods work identically** - Option A just passes configuration inline instead of using a config file.
+
+Verify the application is running:
+
+\`\`\`bash
+pm2 status
+pm2 logs timewave-radio --lines 50
 \`\`\`
 
 ## Step 7: Configure Nginx (Optional but Recommended)
@@ -156,5 +194,5 @@ crontab -e
 
 Add this line:
 
-```cron
+\`\`\`cron
 * * * * * curl -X POST http://localhost:3030/api/cron/live-detector -H "Authorization: Bearer your_random_cron_secret" > /dev/null 2>&1

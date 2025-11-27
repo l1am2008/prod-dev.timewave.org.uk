@@ -2,8 +2,9 @@ import { type NextRequest, NextResponse } from "next/server"
 import { query } from "@/lib/db"
 import { withAuth } from "@/lib/middleware"
 
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
-  console.log("[v0] Admin user detail request for ID:", params.id)
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
+  console.log("[v0] Admin user detail request for ID:", id)
 
   try {
     const auth = await withAuth(["admin", "super_admin"])(request)
@@ -23,7 +24,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
       FROM users u
       LEFT JOIN staff_encoders se ON u.id = se.user_id
       WHERE u.id = ?`,
-      [params.id],
+      [id],
     )
 
     console.log("[v0] Query result:", users.length > 0 ? "User found" : "User not found")
@@ -45,7 +46,8 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
   }
 }
 
-export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
   const auth = await withAuth(["admin", "super_admin"])(request)
   if (auth instanceof NextResponse) return auth
 
@@ -80,7 +82,7 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
       return NextResponse.json({ error: "No updates provided" }, { status: 400 })
     }
 
-    values.push(params.id)
+    values.push(id)
 
     await query(`UPDATE users SET ${updates.join(", ")} WHERE id = ?`, values)
 

@@ -1,7 +1,28 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { verifyToken } from "./auth"
+import { verifyToken as jwtVerifyToken, type UserPayload } from "./auth"
 
-export { verifyToken }
+export async function verifyToken(request: Request): Promise<{ valid: boolean; user: UserPayload | null }> {
+  const authHeader = request.headers.get("authorization")
+
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return { valid: false, user: null }
+  }
+
+  const token = authHeader.substring(7)
+
+  try {
+    const user = jwtVerifyToken(token)
+
+    if (!user) {
+      return { valid: false, user: null }
+    }
+
+    return { valid: true, user }
+  } catch (error) {
+    console.error("[v0] verifyToken error:", error)
+    return { valid: false, user: null }
+  }
+}
 
 export function withAuth(allowedRoles: string[]) {
   return async (request: NextRequest) => {
@@ -18,7 +39,7 @@ export function withAuth(allowedRoles: string[]) {
     console.log("[v0] Attempting to verify token...")
 
     try {
-      const user = verifyToken(token)
+      const user = jwtVerifyToken(token)
 
       if (!user) {
         console.log("[v0] Token verification failed")
@@ -51,7 +72,7 @@ export async function requireStaff(request: Request) {
   const token = authHeader.substring(7)
 
   try {
-    const user = verifyToken(token)
+    const user = jwtVerifyToken(token)
 
     if (!user) {
       return { valid: false, user: null }

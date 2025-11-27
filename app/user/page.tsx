@@ -1,9 +1,11 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Music, Heart, Clock } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Music, Heart, Clock, Edit, Users } from "lucide-react"
 
 interface UserProfile {
   username: string
@@ -15,6 +17,7 @@ interface UserProfile {
 }
 
 export default function UserPortal() {
+  const router = useRouter()
   const [profile, setProfile] = useState<UserProfile | null>(null)
   const [loading, setLoading] = useState(true)
 
@@ -105,10 +108,21 @@ export default function UserPortal() {
                 <span className="text-2xl font-bold">{profile?.username.charAt(0).toUpperCase()}</span>
               </div>
             )}
-            <div>
+            <div className="flex-1">
               <h3 className="font-bold text-lg">{profile?.username}</h3>
               <p className="text-sm text-muted-foreground">{profile?.email}</p>
             </div>
+          </div>
+
+          <div className="flex gap-2">
+            <Button onClick={() => router.push(`/user/${profile?.username}`)} className="flex-1">
+              <Users className="h-4 w-4 mr-2" />
+              View Public Profile
+            </Button>
+            <Button onClick={() => router.push("/user/profile")} variant="outline" className="flex-1">
+              <Edit className="h-4 w-4 mr-2" />
+              Edit Profile
+            </Button>
           </div>
         </CardContent>
       </Card>

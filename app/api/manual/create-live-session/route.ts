@@ -6,20 +6,29 @@ import { cookies } from "next/headers"
 // Manual endpoint for staff to start a live session
 export async function POST() {
   try {
+    console.log("[v0] Create live session endpoint called")
+
     const cookieStore = await cookies()
     const token = cookieStore.get("auth_token")?.value
 
+    console.log("[v0] Token exists:", !!token)
+
     if (!token) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+      console.log("[v0] No auth token found")
+      return NextResponse.json({ error: "Unauthorized - no token" }, { status: 401 })
     }
 
-    const user = await verifyToken(token)
+    const user = verifyToken(token)
+    console.log("[v0] User verified:", !!user, user?.username, user?.role)
+
     if (!user) {
+      console.log("[v0] Invalid token")
       return NextResponse.json({ error: "Invalid token" }, { status: 401 })
     }
 
     // Check if user is staff
     if (!["staff", "admin", "super_admin"].includes(user.role)) {
+      console.log("[v0] User is not staff, role:", user.role)
       return NextResponse.json({ error: "Forbidden - staff access required" }, { status: 403 })
     }
 
@@ -29,6 +38,8 @@ export async function POST() {
     const encoders: any[] = await query(`SELECT * FROM staff_encoders WHERE user_id = ? AND is_active = TRUE`, [
       user.id,
     ])
+
+    console.log("[v0] Active encoders found:", encoders.length)
 
     if (encoders.length === 0) {
       return NextResponse.json({ error: "No active encoder found for your account" }, { status: 400 })
@@ -40,13 +51,13 @@ export async function POST() {
     ])
 
     if (existingSessions.length > 0) {
+      console.log("[v0] Live session already exists")
       return NextResponse.json({
         message: "Live session already active",
         session_id: existingSessions[0].id,
       })
     }
 
-    // Create a new live session
     await query(`INSERT INTO live_sessions (user_id, encoder_id, is_live, started_at) VALUES (?, ?, TRUE, NOW())`, [
       user.id,
       encoders[0].encoder_id,
@@ -59,7 +70,6 @@ export async function POST() {
       message: "Live session started",
       user: {
         username: user.username,
-        name: `${user.firstName} ${user.lastName}`,
       },
     })
   } catch (error) {
@@ -71,6 +81,8 @@ export async function POST() {
 // Manual endpoint to end a live session
 export async function DELETE() {
   try {
+    console.log("[v0] End live session endpoint called")
+
     const cookieStore = await cookies()
     const token = cookieStore.get("auth_token")?.value
 
@@ -78,7 +90,7 @@ export async function DELETE() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const user = await verifyToken(token)
+    const user = verifyToken(token)
     if (!user) {
       return NextResponse.json({ error: "Invalid token" }, { status: 401 })
     }

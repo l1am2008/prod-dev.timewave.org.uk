@@ -85,6 +85,35 @@ npm run build
 pm2 restart timewave-radio
 \`\`\`
 
+## Fix Current Git Conflict
+
+If you're stuck with a git conflict right now:
+
+\`\`\`bash
+# Backup .env.local
+cp .env.local .env.local.backup
+
+# Remove conflicting files
+rm scripts/create-admin.js 2>/dev/null || true
+
+# Reset local changes
+git reset --hard HEAD
+
+# Clean untracked files
+git clean -fd
+
+# Pull latest
+git pull origin main
+
+# Restore .env.local
+cp .env.local.backup .env.local
+
+# Rebuild and restart
+npm install
+npm run build
+pm2 restart timewave-radio
+\`\`\`
+
 ## Automated Updates (Optional)
 
 To automatically pull and deploy on a schedule:

@@ -3,10 +3,17 @@ import { query } from "@/lib/db"
 import { withAuth } from "@/lib/middleware"
 
 export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
-  const auth = await withAuth(["admin", "super_admin"])(request)
-  if (auth instanceof NextResponse) return auth
+  console.log("[v0] Admin user detail request for ID:", params.id)
 
   try {
+    const auth = await withAuth(["admin", "super_admin"])(request)
+    if (auth instanceof NextResponse) {
+      console.log("[v0] Auth failed for user detail request")
+      return auth
+    }
+
+    console.log("[v0] Auth successful, fetching user data...")
+
     const users: any[] = await query(
       `SELECT 
         u.id, u.email, u.username, u.first_name, u.last_name, u.bio,
@@ -19,14 +26,22 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
       [params.id],
     )
 
+    console.log("[v0] Query result:", users.length > 0 ? "User found" : "User not found")
+
     if (users.length === 0) {
       return NextResponse.json({ error: "User not found" }, { status: 404 })
     }
 
     return NextResponse.json(users[0])
   } catch (error) {
-    console.error("[v0] Failed to fetch user:", error)
-    return NextResponse.json({ error: "Failed to fetch user" }, { status: 500 })
+    console.error("[v0] Failed to fetch user details:", error)
+    return NextResponse.json(
+      {
+        error: "Failed to fetch user",
+        details: error instanceof Error ? error.message : String(error),
+      },
+      { status: 500 },
+    )
   }
 }
 

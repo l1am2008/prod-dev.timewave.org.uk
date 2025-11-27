@@ -5,17 +5,21 @@ echo "🔄 Updating Timewave Radio..."
 # Navigate to project directory
 cd /root/prod-dev.timewave.org.uk
 
-# Stash any local changes (like .env.local)
-echo "📦 Stashing local changes..."
-git stash
+echo "💾 Backing up .env.local..."
+cp .env.local .env.local.backup 2>/dev/null || true
+
+echo "🧹 Cleaning up conflicting files..."
+git clean -fd
+
+echo "🔄 Resetting local changes..."
+git reset --hard HEAD
 
 # Pull latest changes from main branch
 echo "⬇️ Pulling latest changes..."
 git pull origin main
 
-# Restore local changes
 echo "📂 Restoring local configuration..."
-git stash pop
+mv .env.local.backup .env.local 2>/dev/null || true
 
 # Install any new dependencies
 echo "📥 Installing dependencies..."

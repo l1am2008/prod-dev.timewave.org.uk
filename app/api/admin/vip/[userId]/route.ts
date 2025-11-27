@@ -8,7 +8,14 @@ export async function POST(request: Request, { params }: { params: Promise<{ use
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
-  const { userId } = await params
+  const resolvedParams = await params
+  const userId = resolvedParams.userId
+
+  const adminId = authCheck.user?.id
+
+  if (!adminId) {
+    return NextResponse.json({ error: "Invalid admin user" }, { status: 400 })
+  }
 
   try {
     await query(
@@ -17,7 +24,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ use
            vip_granted_at = NOW(), 
            vip_granted_by = ?
        WHERE id = ?`,
-      [authCheck.user!.userId, userId],
+      [adminId, userId],
     )
 
     return NextResponse.json({ success: true })
@@ -33,7 +40,8 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ u
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
-  const { userId } = await params
+  const resolvedParams = await params
+  const userId = resolvedParams.userId
 
   try {
     await query(

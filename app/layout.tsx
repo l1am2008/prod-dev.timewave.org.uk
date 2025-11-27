@@ -12,12 +12,12 @@ const _geist = Geist({ subsets: ["latin"] })
 const _geistMono = Geist_Mono({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "Timewave Radio - Broadcasting 24/7",
-  description: "Listen to the best music on Timewave Radio",
-  generator: "v0.app",
+  title: "Timewave Radio",
+  description: "Listen to the best music on Timewave Radio | Broadcasting 24/7",
   icons: {
     icon: "https://us-east-1.tixte.net/uploads/liam.needs.rest/TimewaveTransparent.png",
   },
+    generator: 'v0.app'
 }
 
 export default function RootLayout({

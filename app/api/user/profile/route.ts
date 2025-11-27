@@ -4,27 +4,45 @@ import { verifyToken } from "@/lib/middleware"
 
 export async function GET(request: Request) {
   try {
+    console.log("[v0] Profile GET: Starting...")
     const authResult = await verifyToken(request)
+    console.log("[v0] Profile GET: Auth result:", authResult.valid, authResult.user?.id)
+
     if (!authResult.valid || !authResult.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
     const users: any[] = await query(
-      `SELECT id, username, email, first_name, last_name, avatar_url, bio, role, 
-        favorite_song_title, favorite_song_artist, favorite_song_itunes_id, 
-        favorite_song_artwork, created_at
+      `SELECT id, username, email, first_name, last_name, role, created_at
        FROM users WHERE id = ?`,
       [authResult.user.id],
     )
+
+    console.log("[v0] Profile GET: Query result:", users.length > 0 ? "found" : "not found")
 
     if (users.length === 0) {
       return NextResponse.json({ error: "User not found" }, { status: 404 })
     }
 
-    return NextResponse.json(users[0])
+    const user = users[0]
+    return NextResponse.json({
+      ...user,
+      avatar_url: user.avatar_url || null,
+      bio: user.bio || null,
+      favorite_song_title: user.favorite_song_title || null,
+      favorite_song_artist: user.favorite_song_artist || null,
+      favorite_song_itunes_id: user.favorite_song_itunes_id || null,
+      favorite_song_artwork: user.favorite_song_artwork || null,
+    })
   } catch (error) {
     console.error("[v0] Profile fetch error:", error)
-    return NextResponse.json({ error: "Failed to fetch profile" }, { status: 500 })
+    return NextResponse.json(
+      {
+        error: "Failed to fetch profile",
+        details: error instanceof Error ? error.message : String(error),
+      },
+      { status: 500 },
+    )
   }
 }
 

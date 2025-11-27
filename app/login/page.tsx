@@ -34,15 +34,12 @@ export default function LoginPage() {
       if (response.ok) {
         localStorage.setItem("auth_token", data.token)
 
-        // Redirect based on role
         if (data.user.role === "admin" || data.user.role === "super_admin") {
           localStorage.setItem("admin_token", data.token)
-          router.push("/admin")
-        } else if (data.user.role === "staff") {
-          router.push("/staff")
-        } else {
-          router.push("/")
         }
+
+        // Always redirect to homepage
+        router.push("/")
 
         toast({
           title: "Welcome back!",

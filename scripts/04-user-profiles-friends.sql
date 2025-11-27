@@ -1,8 +1,9 @@
 -- Add favorite song fields to users table
-ALTER TABLE users ADD COLUMN IF NOT EXISTS favorite_song_title VARCHAR(255);
-ALTER TABLE users ADD COLUMN IF NOT EXISTS favorite_song_artist VARCHAR(255);
-ALTER TABLE users ADD COLUMN IF NOT EXISTS favorite_song_itunes_id VARCHAR(100);
-ALTER TABLE users ADD COLUMN IF NOT EXISTS favorite_song_artwork VARCHAR(500);
+-- Removed IF NOT EXISTS as MySQL doesn't support it for ALTER TABLE ADD COLUMN
+ALTER TABLE users ADD COLUMN favorite_song_title VARCHAR(255);
+ALTER TABLE users ADD COLUMN favorite_song_artist VARCHAR(255);
+ALTER TABLE users ADD COLUMN favorite_song_itunes_id VARCHAR(100);
+ALTER TABLE users ADD COLUMN favorite_song_artwork VARCHAR(500);
 
 -- User friendships table
 CREATE TABLE IF NOT EXISTS user_friends (

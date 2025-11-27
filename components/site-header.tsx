@@ -46,13 +46,18 @@ export function SiteHeader() {
     if (!user) return []
     const links = []
 
-    if (user.role === "super_admin" || user.role === "admin") {
-      links.push({ label: "Admin Portal", href: "/admin" })
-    }
+    // All logged-in users get User Editor
+    links.push({ label: "User Editor", href: "/user/profile", icon: User })
+
+    // Staff members get Presenter Portal
     if (user.role === "staff" || user.role === "admin" || user.role === "super_admin") {
-      links.push({ label: "Staff Portal", href: "/staff" })
+      links.push({ label: "Presenter Portal", href: "/staff", icon: Users })
     }
-    links.push({ label: "User Dashboard", href: "/user" })
+
+    // Admins get Admin Portal
+    if (user.role === "super_admin" || user.role === "admin") {
+      links.push({ label: "Admin Portal", href: "/admin", icon: Settings })
+    }
 
     return links
   }
@@ -98,7 +103,7 @@ export function SiteHeader() {
                 {portalLinks.map((link) => (
                   <DropdownMenuItem key={link.href} asChild>
                     <Link href={link.href} className="cursor-pointer">
-                      <Settings className="h-4 w-4 mr-2" />
+                      <link.icon className="h-4 w-4 mr-2" />
                       {link.label}
                     </Link>
                   </DropdownMenuItem>

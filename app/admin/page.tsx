@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Users, Radio, Mail, Activity } from "lucide-react"
+import { Users, Radio, Mail, Activity, Calendar } from "lucide-react"
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState({
@@ -109,6 +109,24 @@ export default function AdminDashboard() {
           </CardContent>
         </Card>
       </div>
+
+      <Card
+        className="cursor-pointer hover:bg-accent transition-colors"
+        onClick={() => (window.location.href = "/admin/shows")}
+      >
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Calendar className="h-5 w-5" />
+            Review Show Submissions
+          </CardTitle>
+          <CardDescription>Approve or reject presenter show requests</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-muted-foreground">
+            Click here to manage pending show approvals and view all scheduled shows.
+          </p>
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>

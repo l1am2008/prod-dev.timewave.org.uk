@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Radio, TrendingUp, Activity } from "lucide-react"
+import { Radio, TrendingUp, Activity, Calendar } from "lucide-react"
 
 interface StaffProfile {
   username: string
@@ -148,6 +148,24 @@ export default function StaffDashboard() {
           </CardContent>
         </Card>
       </div>
+
+      <Card
+        className="cursor-pointer hover:bg-accent transition-colors"
+        onClick={() => (window.location.href = "/staff/shows")}
+      >
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Calendar className="h-5 w-5" />
+            Manage Your Shows
+          </CardTitle>
+          <CardDescription>Create and manage your show schedule</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-muted-foreground">
+            Click here to add new shows, edit existing ones, and track approval status.
+          </p>
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>

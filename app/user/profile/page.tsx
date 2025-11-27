@@ -10,6 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Save, Music, Search, X } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
+import { BioWithMentions } from "@/components/user-mention"
 
 interface Profile {
   username: string
@@ -239,9 +240,15 @@ export default function EditProfilePage() {
               id="bio"
               value={formData.bio}
               onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
-              placeholder="Tell others about yourself..."
+              placeholder="Tell others about yourself... (Use @username to mention users)"
               className="min-h-[120px]"
             />
+            {formData.bio && (
+              <div className="mt-2 p-3 rounded-lg border bg-muted/50">
+                <p className="text-xs font-medium text-muted-foreground mb-2">Preview:</p>
+                <BioWithMentions bio={formData.bio} />
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>

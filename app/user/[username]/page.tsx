@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Music, UserPlus, UserMinus, Edit, Calendar } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
+import { BioWithMentions } from "@/components/user-mention"
 
 interface UserProfile {
   id: number
@@ -228,7 +229,7 @@ export default function UserProfilePage() {
             <CardTitle>About</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-muted-foreground whitespace-pre-wrap">{profile.bio}</p>
+            <BioWithMentions bio={profile.bio} />
           </CardContent>
         </Card>
       )}

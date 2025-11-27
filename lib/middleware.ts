@@ -88,3 +88,30 @@ export async function requireStaff(request: Request) {
     return { valid: false, user: null }
   }
 }
+
+export async function requireAdmin(request: Request) {
+  const authHeader = request.headers.get("authorization")
+
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return { valid: false, user: null }
+  }
+
+  const token = authHeader.substring(7)
+
+  try {
+    const user = jwtVerifyToken(token)
+
+    if (!user) {
+      return { valid: false, user: null }
+    }
+
+    if (!["admin", "super_admin"].includes(user.role)) {
+      return { valid: false, user: null }
+    }
+
+    return { valid: true, user }
+  } catch (error) {
+    console.error("[v0] requireAdmin error:", error)
+    return { valid: false, user: null }
+  }
+}

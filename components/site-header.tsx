@@ -100,10 +100,10 @@ export function SiteHeader() {
               Schedule
             </Button>
           </Link>
-          <Link href="/presenters">
+          <Link href="/community">
             <Button variant="ghost" size="sm">
               <Users className="h-4 w-4 mr-2" />
-              Presenters
+              Community
             </Button>
           </Link>
 

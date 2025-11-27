@@ -1,4 +1,5 @@
 import { query } from "@/lib/db"
+import { SiteHeader } from "@/components/site-header"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Radio } from "lucide-react"
@@ -29,24 +30,7 @@ export default async function PresentersPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b border-border bg-card">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <img
-              src="https://us-east-1.tixte.net/uploads/liam.needs.rest/TimewaveTransparent.png"
-              alt="Timewave Radio"
-              className="h-10 w-10"
-            />
-            <h1 className="text-2xl font-bold">Timewave Radio</h1>
-          </div>
-
-          <nav className="flex items-center gap-4">
-            <Link href="/">
-              <button className="text-sm hover:underline">Home</button>
-            </Link>
-          </nav>
-        </div>
-      </header>
+      <SiteHeader />
 
       <main className="container mx-auto px-4 py-8">
         <div className="mb-8">

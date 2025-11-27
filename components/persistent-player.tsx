@@ -23,7 +23,7 @@ export function PersistentPlayer() {
   const [isPlaying, setIsPlaying] = useState(false)
   const [volume, setVolume] = useState(70)
   const [isMuted, setIsMuted] = useState(false)
-  const [isMinimized, setIsMinimized] = useState(false)
+  const [isMinimized, setIsMinimized] = useState(true)
   const [nowPlaying, setNowPlaying] = useState<NowPlayingData | null>(null)
   const audioRef = useRef<HTMLAudioElement>(null)
 
@@ -58,6 +58,7 @@ export function PersistentPlayer() {
         audioRef.current.pause()
       } else {
         audioRef.current.play()
+        setIsMinimized(true)
       }
       setIsPlaying(!isPlaying)
     }

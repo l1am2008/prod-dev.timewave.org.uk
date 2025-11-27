@@ -2,10 +2,10 @@ import { NowPlayingBanner } from "@/components/now-playing-banner"
 import { SongHistory } from "@/components/song-history"
 import { RequestForm } from "@/components/request-form"
 import { ActiveUsersFooter } from "@/components/active-users-footer"
-import { ThemeToggle } from "@/components/theme-toggle"
+import { SiteHeader } from "@/components/site-header"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Calendar, Users, Radio } from "lucide-react"
+import { Radio } from "lucide-react"
 import Link from "next/link"
 import { query } from "@/lib/db"
 
@@ -34,43 +34,7 @@ export default async function HomePage() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b border-border bg-card">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <img
-              src="https://us-east-1.tixte.net/uploads/liam.needs.rest/TimewaveTransparent.png"
-              alt="Timewave Radio"
-              className="h-10 w-10"
-            />
-            <h1 className="text-2xl font-bold">Timewave Radio</h1>
-          </div>
-
-          <nav className="flex items-center gap-4">
-            <ThemeToggle />
-            <Link href="/schedule">
-              <Button variant="ghost" size="sm">
-                <Calendar className="h-4 w-4 mr-2" />
-                Schedule
-              </Button>
-            </Link>
-            <Link href="/presenters">
-              <Button variant="ghost" size="sm">
-                <Users className="h-4 w-4 mr-2" />
-                Presenters
-              </Button>
-            </Link>
-            <Link href="/register">
-              <Button variant="outline" size="sm">
-                Register
-              </Button>
-            </Link>
-            <Link href="/login">
-              <Button size="sm">Login</Button>
-            </Link>
-          </nav>
-        </div>
-      </header>
+      <SiteHeader />
 
       <main className="container mx-auto px-4 py-8 space-y-8">
         <NowPlayingBanner />

@@ -47,7 +47,7 @@ export default function AdminShowsManagement() {
 
   const fetchShows = async () => {
     try {
-      const token = localStorage.getItem("admin_token")
+      const token = localStorage.getItem("auth_token")
       const response = await fetch("/api/admin/shows", {
         headers: { Authorization: `Bearer ${token}` },
       })
@@ -65,7 +65,7 @@ export default function AdminShowsManagement() {
 
   const handleApprove = async (showId: number) => {
     try {
-      const token = localStorage.getItem("admin_token")
+      const token = localStorage.getItem("auth_token")
       const response = await fetch(`/api/admin/shows/${showId}/approve`, {
         method: "POST",
         headers: {
@@ -87,7 +87,7 @@ export default function AdminShowsManagement() {
     if (!selectedShow) return
 
     try {
-      const token = localStorage.getItem("admin_token")
+      const token = localStorage.getItem("auth_token")
       const response = await fetch(`/api/admin/shows/${selectedShow.id}/approve`, {
         method: "POST",
         headers: {

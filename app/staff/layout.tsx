@@ -2,7 +2,7 @@ import type React from "react"
 import type { Metadata } from "next"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { User, Radio, History, LayoutDashboard, Music } from "lucide-react"
+import { User, Radio, History, LayoutDashboard, Music, Calendar } from "lucide-react"
 
 export const metadata: Metadata = {
   title: "Staff Portal - Timewave Radio",
@@ -53,6 +53,12 @@ export default function StaffLayout({
               <Button variant="ghost" className="w-full justify-start">
                 <User className="h-4 w-4 mr-2" />
                 My Profile
+              </Button>
+            </Link>
+            <Link href="/staff/shows">
+              <Button variant="ghost" className="w-full justify-start">
+                <Calendar className="h-4 w-4 mr-2" />
+                My Shows
               </Button>
             </Link>
             <Link href="/staff/encoder">

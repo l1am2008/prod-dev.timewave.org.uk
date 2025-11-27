@@ -7,6 +7,10 @@
     {
       "path": "/api/cron/sync-history",
       "schedule": "* * * * *"
+    },
+    {
+      "path": "/api/cron/detect-live-session",
+      "schedule": "* * * * *"
     }
   ]
 }

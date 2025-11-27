@@ -2,7 +2,6 @@ import { NowPlayingBanner } from "@/components/now-playing-banner"
 import { SongHistory } from "@/components/song-history"
 import { RequestForm } from "@/components/request-form"
 import { ActiveUsersFooter } from "@/components/active-users-footer"
-import { SiteHeader } from "@/components/site-header"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Radio } from "lucide-react"
@@ -34,8 +33,6 @@ export default async function HomePage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <SiteHeader />
-
       <main className="container mx-auto px-4 py-8 space-y-8">
         <NowPlayingBanner />
 

@@ -1,5 +1,4 @@
 import { query } from "@/lib/db"
-import { SiteHeader } from "@/components/site-header"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Radio } from "lucide-react"
@@ -30,8 +29,6 @@ export default async function PresentersPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <SiteHeader />
-
       <main className="container mx-auto px-4 py-8">
         <div className="mb-8">
           <h2 className="text-3xl font-bold mb-2">Our Presenters</h2>

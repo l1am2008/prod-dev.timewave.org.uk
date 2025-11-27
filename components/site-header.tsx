@@ -15,31 +15,47 @@ interface UserRole {
 
 export function SiteHeader() {
   const [user, setUser] = useState<UserRole | null>(null)
+  const [loading, setLoading] = useState(true)
   const router = useRouter()
 
   useEffect(() => {
     const token = localStorage.getItem("auth_token")
+    console.log("[v0] SiteHeader checking auth, token exists:", !!token)
+
     if (token) {
-      // Fetch user info
-      fetch("/api/user/profile", {
+      fetch("/api/auth/me", {
         headers: { Authorization: `Bearer ${token}` },
       })
-        .then((res) => res.json())
+        .then((res) => {
+          console.log("[v0] Auth check response status:", res.status)
+          if (!res.ok) {
+            throw new Error("Auth failed")
+          }
+          return res.json()
+        })
         .then((data) => {
-          if (data.role) {
+          console.log("[v0] User data received:", data)
+          if (data.role && data.username) {
             setUser({ role: data.role, username: data.username })
           }
+          setLoading(false)
         })
-        .catch(() => {
+        .catch((error) => {
+          console.error("[v0] Auth check failed:", error)
           localStorage.removeItem("auth_token")
+          setLoading(false)
         })
+    } else {
+      setLoading(false)
     }
   }, [])
 
   const handleLogout = () => {
+    console.log("[v0] Logging out")
     localStorage.removeItem("auth_token")
     setUser(null)
     router.push("/")
+    router.refresh()
   }
 
   const getPortalLinks = () => {
@@ -91,7 +107,9 @@ export function SiteHeader() {
             </Button>
           </Link>
 
-          {user ? (
+          {loading ? (
+            <div className="h-9 w-24 bg-muted animate-pulse rounded-md" />
+          ) : user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="sm">

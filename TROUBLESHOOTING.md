@@ -20,6 +20,23 @@ npm install
 npm run build
 \`\`\`
 
+### Build Lock Error
+
+**Problem:** "Unable to acquire lock at .next/lock, is another instance of next build running?"
+
+**Cause:** Previous build process didn't exit cleanly or another build is running.
+
+**Solution:**
+\`\`\`bash
+# Quick fix - remove lock file
+rm -f .next/lock
+npm run build
+
+# Or use the rebuild script for a clean build
+chmod +x rebuild.sh
+./rebuild.sh
+\`\`\`
+
 ### Database Connection Errors
 
 **Problem:** "Failed to connect to database" or similar errors.
@@ -56,33 +73,6 @@ To fix SMTP:
 npm run build
 
 # Then start PM2
-pm2 start npm --name "timewave-radio" --cwd ~/prod-dev.timewave.org.uk -- start
-\`\`\`
-
-### Admin Portal 500 Errors
-
-**Problem:** Getting 500 errors when accessing admin pages.
-
-**Checklist:**
-1. Check PM2 logs: `pm2 logs timewave-radio --lines 100`
-2. Verify admin user exists in database
-3. Check JWT_SECRET is set in `.env.local`
-4. Verify database tables were created: `npm run setup-db`
-
-### Port Already in Use
-
-**Problem:** "EADDRINUSE: address already in use :::3030"
-
-**Solution:**
-\`\`\`bash
-# Find process using port 3030
-lsof -i :3030
-
-# Kill the process (replace PID with actual process ID)
-kill -9 <PID>
-
-# Or stop PM2 first
-pm2 stop timewave-radio
 pm2 start npm --name "timewave-radio" --cwd ~/prod-dev.timewave.org.uk -- start
 \`\`\`
 

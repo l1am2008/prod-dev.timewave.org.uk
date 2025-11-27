@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { ArrowLeft, Save, UserPlus, Crown } from "lucide-react"
+import { ArrowLeft, Save, UserPlus } from "lucide-react"
 import Link from "next/link"
 import { useToast } from "@/hooks/use-toast"
 
@@ -22,8 +22,6 @@ interface UserDetails {
   role: string
   staff_role: string
   is_verified: boolean
-  is_vip: boolean
-  vip_granted_at: string | null
   encoder_id: string
   encoder_active: boolean
   created_at: string
@@ -37,7 +35,6 @@ export default function UserDetailsPage() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [promoting, setPromoting] = useState(false)
-  const [togglingVip, setTogglingVip] = useState(false)
   const [role, setRole] = useState("")
   const [staffRole, setStaffRole] = useState("")
 
@@ -156,43 +153,6 @@ export default function UserDetailsPage() {
     }
   }
 
-  const handleToggleVip = async () => {
-    setTogglingVip(true)
-    try {
-      const token = localStorage.getItem("admin_token")
-      const method = user?.is_vip ? "DELETE" : "POST"
-      const response = await fetch(`/api/admin/vip/${params.id}`, {
-        method,
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-
-      if (response.ok) {
-        toast({
-          title: "Success",
-          description: user?.is_vip ? "VIP status revoked" : "VIP status granted",
-        })
-        fetchUser()
-      } else {
-        const data = await response.json()
-        toast({
-          title: "Error",
-          description: data.error || "Failed to update VIP status",
-          variant: "destructive",
-        })
-      }
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to update VIP status",
-        variant: "destructive",
-      })
-    } finally {
-      setTogglingVip(false)
-    }
-  }
-
   if (loading) {
     return <div>Loading...</div>
   }
@@ -253,26 +213,6 @@ export default function UserDetailsPage() {
               </div>
             </div>
             <div>
-              <Label className="text-muted-foreground">VIP Status</Label>
-              <div className="mt-1 flex items-center gap-2">
-                {user.is_vip ? (
-                  <>
-                    <Badge variant="outline" className="bg-yellow-500/10 text-yellow-700 border-yellow-500/20">
-                      <Crown className="h-3 w-3 mr-1" />
-                      VIP Member
-                    </Badge>
-                    {user.vip_granted_at && (
-                      <span className="text-xs text-muted-foreground">
-                        Since {new Date(user.vip_granted_at).toLocaleDateString()}
-                      </span>
-                    )}
-                  </>
-                ) : (
-                  <Badge variant="outline">Regular User</Badge>
-                )}
-              </div>
-            </div>
-            <div>
               <Label className="text-muted-foreground">Member Since</Label>
               <p className="font-medium">
                 {new Date(user.created_at).toLocaleDateString("en-US", {
@@ -310,23 +250,13 @@ export default function UserDetailsPage() {
               <Input
                 value={staffRole}
                 onChange={(e) => setStaffRole(e.target.value)}
-                placeholder="e.g., DJ, Host, Producer"
+                placeholder="e.g., Chair of Trustees, DJ, Host"
               />
             </div>
 
             <Button onClick={handleSave} disabled={saving} className="w-full">
               <Save className="h-4 w-4 mr-2" />
               {saving ? "Saving..." : "Save Changes"}
-            </Button>
-
-            <Button
-              onClick={handleToggleVip}
-              disabled={togglingVip}
-              variant={user.is_vip ? "destructive" : "default"}
-              className="w-full"
-            >
-              <Crown className="h-4 w-4 mr-2" />
-              {togglingVip ? "Updating..." : user.is_vip ? "Revoke VIP Status" : "Grant VIP Status"}
             </Button>
 
             {user.role !== "staff" && !user.encoder_id && (

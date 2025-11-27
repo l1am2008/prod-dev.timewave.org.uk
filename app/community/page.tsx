@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Radio, Crown, UsersIcon } from "lucide-react"
+import { Radio, UsersIcon } from "lucide-react"
 import Link from "next/link"
 
 interface User {
@@ -16,7 +16,6 @@ interface User {
   avatar_url: string
   role: string
   staff_role?: string
-  is_vip: boolean
   total_shows?: number
   is_live?: boolean
 }
@@ -24,21 +23,15 @@ interface User {
 export default function CommunityPage() {
   const [allUsers, setAllUsers] = useState<User[]>([])
   const [staffUsers, setStaffUsers] = useState<User[]>([])
-  const [vipUsers, setVipUsers] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     async function fetchCommunity() {
       try {
-        const [allRes, staffRes, vipRes] = await Promise.all([
-          fetch("/api/community/all"),
-          fetch("/api/community/staff"),
-          fetch("/api/community/vips"),
-        ])
+        const [allRes, staffRes] = await Promise.all([fetch("/api/community/all"), fetch("/api/community/staff")])
 
         if (allRes.ok) setAllUsers(await allRes.json())
         if (staffRes.ok) setStaffUsers(await staffRes.json())
-        if (vipRes.ok) setVipUsers(await vipRes.json())
       } catch (error) {
         console.error("[v0] Failed to fetch community:", error)
       } finally {
@@ -67,12 +60,9 @@ export default function CommunityPage() {
                 </div>
               )}
               <div>
-                <div className="flex items-center gap-2">
-                  <CardTitle className="text-lg">
-                    {user.first_name && user.last_name ? `${user.first_name} ${user.last_name}` : user.username}
-                  </CardTitle>
-                  {user.is_vip && <Crown className="h-4 w-4 text-yellow-500" />}
-                </div>
+                <CardTitle className="text-lg">
+                  {user.first_name && user.last_name ? `${user.first_name} ${user.last_name}` : user.username}
+                </CardTitle>
                 <CardDescription className="text-sm">@{user.username}</CardDescription>
               </div>
             </div>
@@ -120,7 +110,7 @@ export default function CommunityPage() {
         </div>
 
         <Tabs defaultValue="all" className="w-full">
-          <TabsList className="grid w-full max-w-md grid-cols-3">
+          <TabsList className="grid w-full max-w-md grid-cols-2">
             <TabsTrigger value="all">
               <UsersIcon className="h-4 w-4 mr-2" />
               All Users
@@ -128,10 +118,6 @@ export default function CommunityPage() {
             <TabsTrigger value="staff">
               <Radio className="h-4 w-4 mr-2" />
               Staff
-            </TabsTrigger>
-            <TabsTrigger value="vips">
-              <Crown className="h-4 w-4 mr-2" />
-              VIPs
             </TabsTrigger>
           </TabsList>
 
@@ -156,19 +142,6 @@ export default function CommunityPage() {
               {staffUsers.length === 0 && (
                 <div className="col-span-full text-center py-12">
                   <p className="text-muted-foreground">No staff members found</p>
-                </div>
-              )}
-            </div>
-          </TabsContent>
-
-          <TabsContent value="vips" className="mt-6">
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {vipUsers.map((user) => (
-                <UserCard key={user.id} user={user} />
-              ))}
-              {vipUsers.length === 0 && (
-                <div className="col-span-full text-center py-12">
-                  <p className="text-muted-foreground">No VIPs yet</p>
                 </div>
               )}
             </div>

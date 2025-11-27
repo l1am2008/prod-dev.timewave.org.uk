@@ -6,47 +6,67 @@ export async function GET() {
   try {
     console.log("[v0] Detecting live sessions from AzuraCast...")
 
-    // Fetch station status from AzuraCast
     const azuracastUrl = process.env.AZURACAST_BASE_URL
-    const response = await fetch(`${azuracastUrl}/api/nowplaying/timewave_radio`)
+    const azuracastApiKey = process.env.AZURACAST_API_KEY
+
+    // Fetch station status from AzuraCast
+    const response = await fetch(`${azuracastUrl}/api/nowplaying/timewave_radio`, {
+      headers: azuracastApiKey ? { "X-API-Key": azuracastApiKey } : {},
+    })
     const data = await response.json()
 
-    console.log("[v0] AzuraCast live status:", data.live)
+    console.log("[v0] AzuraCast data:", JSON.stringify(data, null, 2))
 
     if (data.live && data.live.is_live) {
-      // Someone is live - check if it's a registered encoder
       const streamerName = data.live.streamer_name || ""
       console.log("[v0] Live streamer detected:", streamerName)
 
-      // Try to find the encoder in our database
       const encoders: any[] = await query(
-        `SELECT se.*, u.id as user_id, u.username, u.first_name, u.last_name
+        `SELECT se.*, u.id as user_id, u.username, u.first_name, u.last_name, u.avatar_url
          FROM staff_encoders se
          INNER JOIN users u ON se.user_id = u.id
          WHERE se.is_active = TRUE`,
       )
 
-      console.log("[v0] Active encoders in database:", encoders.length)
+      console.log("[v0] Active encoders in database:", encoders.length, encoders)
 
-      // For now, match by checking if any encoder belongs to a user
-      // In production, you'd match encoder_id from AzuraCast
+      // Try to match by username or encoder_id
+      let matchedEncoder = null
       for (const encoder of encoders) {
+        // Match by username or encoder_id from AzuraCast
+        if (
+          streamerName.toLowerCase().includes(encoder.username.toLowerCase()) ||
+          encoder.encoder_id === streamerName
+        ) {
+          matchedEncoder = encoder
+          break
+        }
+      }
+
+      if (!matchedEncoder && encoders.length === 1) {
+        matchedEncoder = encoders[0]
+        console.log("[v0] Using single active encoder as match")
+      }
+
+      if (matchedEncoder) {
         // Check if there's already an active session for this user
         const existingSessions: any[] = await query(
           `SELECT * FROM live_sessions WHERE user_id = ? AND is_live = TRUE`,
-          [encoder.user_id],
+          [matchedEncoder.user_id],
         )
 
         if (existingSessions.length === 0) {
           // Create a new live session
           await query(
             `INSERT INTO live_sessions (user_id, encoder_id, is_live, started_at) VALUES (?, ?, TRUE, NOW())`,
-            [encoder.user_id, encoder.encoder_id],
+            [matchedEncoder.user_id, matchedEncoder.encoder_id],
           )
-          console.log(`[v0] Created live session for user ${encoder.username}`)
+          console.log(`[v0] Created live session for user ${matchedEncoder.username}`)
         } else {
-          console.log(`[v0] Live session already exists for user ${encoder.username}`)
+          console.log(`[v0] Live session already exists for user ${matchedEncoder.username}`)
         }
+      } else {
+        console.log("[v0] No matching encoder found for streamer:", streamerName)
       }
     } else {
       // No one is live - end all active sessions

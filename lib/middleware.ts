@@ -1,6 +1,8 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { verifyToken } from "./auth"
 
+export { verifyToken }
+
 export function withAuth(allowedRoles: string[]) {
   return async (request: NextRequest) => {
     console.log("[v0] Auth middleware called for roles:", allowedRoles)
@@ -36,5 +38,32 @@ export function withAuth(allowedRoles: string[]) {
       console.error("[v0] Auth middleware error:", error)
       return NextResponse.json({ error: "Authentication failed" }, { status: 401 })
     }
+  }
+}
+
+export async function requireStaff(request: Request) {
+  const authHeader = request.headers.get("authorization")
+
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return { valid: false, user: null }
+  }
+
+  const token = authHeader.substring(7)
+
+  try {
+    const user = verifyToken(token)
+
+    if (!user) {
+      return { valid: false, user: null }
+    }
+
+    if (!["staff", "admin", "super_admin"].includes(user.role)) {
+      return { valid: false, user: null }
+    }
+
+    return { valid: true, user }
+  } catch (error) {
+    console.error("[v0] requireStaff error:", error)
+    return { valid: false, user: null }
   }
 }

@@ -1,4 +1,8 @@
 import { NowPlayingBanner } from "@/components/now-playing-banner"
+import { SongHistory } from "@/components/song-history"
+import { RequestForm } from "@/components/request-form"
+import { ActiveUsersFooter } from "@/components/active-users-footer"
+import { ThemeToggle } from "@/components/theme-toggle"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Calendar, Users, Radio } from "lucide-react"
@@ -43,6 +47,7 @@ export default async function HomePage() {
           </div>
 
           <nav className="flex items-center gap-4">
+            <ThemeToggle />
             <Link href="/schedule">
               <Button variant="ghost" size="sm">
                 <Calendar className="h-4 w-4 mr-2" />
@@ -68,7 +73,6 @@ export default async function HomePage() {
       </header>
 
       <main className="container mx-auto px-4 py-8 space-y-8">
-        {/* Now Playing Banner */}
         <NowPlayingBanner />
 
         {livePresenter && (
@@ -114,7 +118,6 @@ export default async function HomePage() {
           </Card>
         )}
 
-        {/* Welcome Section */}
         <div className="grid md:grid-cols-2 gap-6">
           <div className="bg-card border border-border rounded-lg p-6">
             <div className="flex items-start gap-3 mb-4">
@@ -150,51 +153,13 @@ export default async function HomePage() {
           </div>
         </div>
 
-        {/* Recent Tracks */}
-        <RecentTracks />
+        <div className="grid md:grid-cols-2 gap-6">
+          <SongHistory />
+          <RequestForm />
+        </div>
       </main>
+
+      <ActiveUsersFooter />
     </div>
   )
-}
-
-async function RecentTracks() {
-  try {
-    const response = await fetch("https://admin.stream.timewave.org.uk/api/station/timewave_radio/history", {
-      next: { revalidate: 30 },
-    })
-
-    if (!response.ok) {
-      throw new Error("Failed to fetch history")
-    }
-
-    const history: any[] = await response.json()
-    const recentTracks = history.slice(0, 5)
-
-    return (
-      <div className="bg-card border border-border rounded-lg p-6">
-        <h3 className="text-xl font-bold mb-4">Recently Played</h3>
-        <div className="space-y-3">
-          {recentTracks.map((track, index) => (
-            <div key={index} className="flex items-center gap-4 p-3 hover:bg-accent rounded-lg transition-colors">
-              <img
-                src={track.song.art || "/placeholder.svg?height=48&width=48"}
-                alt={track.song.title}
-                className="w-12 h-12 rounded"
-              />
-              <div className="flex-1 min-w-0">
-                <p className="font-medium truncate">{track.song.title}</p>
-                <p className="text-sm text-muted-foreground truncate">{track.song.artist}</p>
-              </div>
-              <p className="text-xs text-muted-foreground">
-                {new Date(track.played_at * 1000).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}
-              </p>
-            </div>
-          ))}
-        </div>
-      </div>
-    )
-  } catch (error) {
-    console.error("[v0] Failed to fetch recent tracks:", error)
-    return null
-  }
 }

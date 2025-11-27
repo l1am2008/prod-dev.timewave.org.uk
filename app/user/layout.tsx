@@ -1,19 +1,23 @@
+"use client"
+
 import type React from "react"
-import type { Metadata } from "next"
+import { useEffect } from "react"
+import { useRouter, usePathname } from "next/navigation"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { User, Radio, History, LayoutDashboard, Music } from "lucide-react"
+import { User, Settings, LayoutDashboard } from "lucide-react"
 
-export const metadata: Metadata = {
-  title: "Staff Portal - Timewave Radio",
-  description: "Manage your broadcasts and profile",
-}
+export default function UserLayout({ children }: { children: React.ReactNode }) {
+  const router = useRouter()
+  const pathname = usePathname()
 
-export default function StaffLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+  useEffect(() => {
+    const token = localStorage.getItem("auth_token")
+    if (!token) {
+      router.push("/login")
+    }
+  }, [pathname, router])
+
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b border-border bg-card">
@@ -25,7 +29,7 @@ export default function StaffLayout({
               className="h-10 w-10"
             />
             <div>
-              <h1 className="text-xl font-bold">Staff Portal</h1>
+              <h1 className="text-xl font-bold">User Portal</h1>
               <p className="text-xs text-muted-foreground">Timewave Radio</p>
             </div>
           </div>
@@ -43,34 +47,22 @@ export default function StaffLayout({
       <div className="flex">
         <aside className="w-64 border-r border-border bg-card min-h-[calc(100vh-73px)]">
           <nav className="p-4 space-y-2">
-            <Link href="/staff">
+            <Link href="/user">
               <Button variant="ghost" className="w-full justify-start">
                 <LayoutDashboard className="h-4 w-4 mr-2" />
                 Dashboard
               </Button>
             </Link>
-            <Link href="/staff/profile">
+            <Link href="/user/profile">
               <Button variant="ghost" className="w-full justify-start">
                 <User className="h-4 w-4 mr-2" />
                 My Profile
               </Button>
             </Link>
-            <Link href="/staff/encoder">
+            <Link href="/user/settings">
               <Button variant="ghost" className="w-full justify-start">
-                <Radio className="h-4 w-4 mr-2" />
-                Encoder Info
-              </Button>
-            </Link>
-            <Link href="/staff/requests">
-              <Button variant="ghost" className="w-full justify-start">
-                <Music className="h-4 w-4 mr-2" />
-                Song Requests
-              </Button>
-            </Link>
-            <Link href="/staff/history">
-              <Button variant="ghost" className="w-full justify-start">
-                <History className="h-4 w-4 mr-2" />
-                Broadcast History
+                <Settings className="h-4 w-4 mr-2" />
+                Settings
               </Button>
             </Link>
           </nav>

@@ -31,7 +31,19 @@ export function getDb() {
         queueLimit: 0,
         enableKeepAlive: true,
         keepAliveInitialDelay: 0,
+        connectTimeout: 10000,
+        acquireTimeout: 10000,
       })
+
+      pool
+        .getConnection()
+        .then((connection) => {
+          console.log("[v0] Database connection successful")
+          connection.release()
+        })
+        .catch((error) => {
+          console.error("[v0] Database connection test failed:", error.message)
+        })
     } catch (error) {
       console.error("[v0] Failed to create database pool:", error)
       throw error

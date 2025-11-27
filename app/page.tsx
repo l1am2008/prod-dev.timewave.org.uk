@@ -1,10 +1,13 @@
+import { CardContent } from "@/components/ui/card"
+import { CardTitle } from "@/components/ui/card"
+import { CardHeader } from "@/components/ui/card"
+import { Card } from "@/components/ui/card"
 import { NowPlayingBanner } from "@/components/now-playing-banner"
 import { SongHistory } from "@/components/song-history"
 import { RequestForm } from "@/components/request-form"
 import { ActiveUsersFooter } from "@/components/active-users-footer"
+import { UpcomingShows } from "@/components/upcoming-shows"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Radio } from "lucide-react"
 import Link from "next/link"
 import { query } from "@/lib/db"
 
@@ -28,8 +31,39 @@ async function getLivePresenter() {
   }
 }
 
+async function getUpcomingShows() {
+  try {
+    const now = new Date()
+    const currentDay = now.getDay()
+    const currentTime = now.toTimeString().slice(0, 8)
+    const threeHoursFromNow = new Date(now.getTime() + 3 * 60 * 60 * 1000)
+
+    const shows: any[] = await query(
+      `SELECT 
+        s.id, s.title, s.description, s.day_of_week, s.start_time, s.end_time,
+        u.id as user_id, u.username, u.first_name, u.last_name, u.avatar_url, u.staff_role
+      FROM schedule s
+      INNER JOIN users u ON s.user_id = u.id
+      WHERE s.is_active = TRUE
+        AND s.is_recurring = TRUE
+        AND s.day_of_week = ?
+        AND s.start_time >= ?
+        AND s.start_time <= TIME(?)
+      ORDER BY s.start_time ASC
+      LIMIT 10`,
+      [currentDay, currentTime, threeHoursFromNow.toTimeString().slice(0, 8)],
+    )
+
+    return shows
+  } catch (error) {
+    console.error("[v0] Failed to fetch upcoming shows:", error)
+    return []
+  }
+}
+
 export default async function HomePage() {
   const livePresenter = await getLivePresenter()
+  const upcomingShows = await getUpcomingShows()
 
   return (
     <div className="min-h-screen bg-background">
@@ -79,39 +113,16 @@ export default async function HomePage() {
           </Card>
         )}
 
-        <div className="grid md:grid-cols-2 gap-6">
-          <div className="bg-card border border-border rounded-lg p-6">
-            <div className="flex items-start gap-3 mb-4">
-              <div className="p-2 bg-primary/10 rounded-lg">
-                <Radio className="h-6 w-6 text-primary" />
-              </div>
-              <div>
-                <h2 className="text-xl font-bold mb-2">Welcome to Timewave Radio</h2>
-                <p className="text-sm text-muted-foreground">
-                  {"Today is "}{" "}
-                  {new Date().toLocaleDateString("en-US", {
-                    weekday: "long",
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                  })}
-                </p>
-              </div>
-            </div>
-            <p className="text-muted-foreground">
-              Broadcasting the best music 24/7. Join our community of music lovers and never miss a beat.
-            </p>
-          </div>
+        <UpcomingShows shows={upcomingShows} />
 
-          <div className="bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg p-6 text-white">
-            <h3 className="text-xl font-bold mb-2">Become a Presenter</h3>
-            <p className="text-blue-100 mb-4">
-              Join our team and share your passion for music with listeners around the world.
-            </p>
-            <Link href="/register">
-              <Button variant="secondary">Get Started</Button>
-            </Link>
-          </div>
+        <div className="bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg p-6 text-white">
+          <h3 className="text-xl font-bold mb-2">Become a Presenter</h3>
+          <p className="text-blue-100 mb-4">
+            Join our team and share your passion for music with listeners around the world.
+          </p>
+          <Link href="/register">
+            <Button variant="secondary">Get Started</Button>
+          </Link>
         </div>
 
         <div className="grid md:grid-cols-2 gap-6">

@@ -64,8 +64,8 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       return NextResponse.json({ error: "User ID is required" }, { status: 400 })
     }
 
-    const can_create_shows = body.can_create_shows === true ? 1 : 0
-    const can_create_articles = body.can_create_articles === true ? 1 : 0
+    const can_create_shows = Boolean(body.can_create_shows) ? 1 : 0
+    const can_create_articles = Boolean(body.can_create_articles) ? 1 : 0
 
     console.log(
       "[v0] Updating permissions - user:",

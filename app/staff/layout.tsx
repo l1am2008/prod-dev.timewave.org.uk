@@ -16,32 +16,8 @@ export default function StaffLayout({
 }) {
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b border-border bg-card">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <img
-              src="https://us-east-1.tixte.net/uploads/liam.needs.rest/TimewaveTransparent.png"
-              alt="Timewave Radio"
-              className="h-10 w-10"
-            />
-            <div>
-              <h1 className="text-xl font-bold">Staff Portal</h1>
-              <p className="text-xs text-muted-foreground">Timewave Radio</p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <Link href="/">
-              <Button variant="outline" size="sm">
-                Back to Site
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </header>
-
       <div className="flex">
-        <aside className="w-64 border-r border-border bg-card min-h-[calc(100vh-73px)]">
+        <aside className="w-64 border-r border-border bg-card min-h-screen">
           <nav className="p-4 space-y-2">
             <Link href="/staff">
               <Button variant="ghost" className="w-full justify-start">

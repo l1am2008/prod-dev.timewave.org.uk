@@ -6,8 +6,15 @@ export async function GET() {
   try {
     console.log("[v0] Detecting live sessions from AzuraCast...")
 
-    const azuracastUrl = process.env.AZURACAST_BASE_URL
+    const azuracastUrl = process.env.AZURACAST_API_URL?.replace("/api", "") || process.env.AZURACAST_BASE_URL
     const azuracastApiKey = process.env.AZURACAST_API_KEY
+
+    if (!azuracastUrl) {
+      console.error("[v0] AZURACAST_API_URL not configured!")
+      return NextResponse.json({ error: "AzuraCast URL not configured" }, { status: 500 })
+    }
+
+    console.log("[v0] Using AzuraCast URL:", azuracastUrl)
 
     // Fetch station status from AzuraCast
     const response = await fetch(`${azuracastUrl}/api/nowplaying/timewave_radio`, {

@@ -15,14 +15,14 @@ export default function UserLayout({ children }: { children: React.ReactNode }) 
 
   useEffect(() => {
     const token = localStorage.getItem("auth_token")
-    if (!token) {
-      router.push("/login")
-      return
+
+    // Only fetch current user if logged in
+    if (token) {
+      fetchCurrentUser()
     }
 
-    fetchCurrentUser()
     checkIfShouldShowSidebar()
-  }, [pathname, router])
+  }, [pathname])
 
   const fetchCurrentUser = async () => {
     try {
@@ -56,7 +56,12 @@ export default function UserLayout({ children }: { children: React.ReactNode }) 
         setShowSidebar(false)
       }
     } else {
-      setShowSidebar(true)
+      const token = localStorage.getItem("auth_token")
+      if (!token && isOwnProfile) {
+        router.push("/login")
+      } else {
+        setShowSidebar(!!token && isOwnProfile)
+      }
     }
   }
 
@@ -65,7 +70,11 @@ export default function UserLayout({ children }: { children: React.ReactNode }) 
   }, [pathname, currentUsername])
 
   if (!showSidebar) {
-    return <main className="min-h-screen bg-background p-8">{children}</main>
+    return (
+      <main className="min-h-screen bg-background flex justify-center">
+        <div className="w-full max-w-4xl">{children}</div>
+      </main>
+    )
   }
 
   return (

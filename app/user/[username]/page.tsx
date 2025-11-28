@@ -105,10 +105,11 @@ export default function UserProfilePage() {
       const token = localStorage.getItem("auth_token")
       if (!token) {
         toast({
-          title: "Error",
-          description: "You must be logged in",
+          title: "Login Required",
+          description: "You must be logged in to add friends",
           variant: "destructive",
         })
+        router.push("/login")
         return
       }
 
@@ -149,15 +150,15 @@ export default function UserProfilePage() {
   }
 
   if (loading) {
-    return <div className="container py-8">Loading...</div>
+    return <div className="py-8">Loading...</div>
   }
 
   if (!profile) {
-    return <div className="container py-8">User not found</div>
+    return <div className="py-8">User not found</div>
   }
 
   return (
-    <div className="container max-w-4xl py-8 space-y-6">
+    <div className="py-8 space-y-6">
       <Card>
         <CardContent className="pt-6">
           <div className="flex flex-col md:flex-row gap-6">

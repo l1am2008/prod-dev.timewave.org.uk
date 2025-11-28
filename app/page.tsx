@@ -2,7 +2,6 @@ import { CardContent } from "@/components/ui/card"
 import { CardTitle } from "@/components/ui/card"
 import { CardHeader } from "@/components/ui/card"
 import { Card } from "@/components/ui/card"
-import { NowPlayingBanner } from "@/components/now-playing-banner"
 import { SongHistory } from "@/components/song-history"
 import { RequestForm } from "@/components/request-form"
 import { ActiveUsersFooter } from "@/components/active-users-footer"
@@ -89,8 +88,6 @@ export default async function HomePage() {
   return (
     <div className="min-h-screen bg-background">
       <main className="container mx-auto px-4 py-8 space-y-8">
-        <NowPlayingBanner />
-
         {livePresenter && (
           <Card className="border-red-500 bg-red-500/5">
             <CardHeader>

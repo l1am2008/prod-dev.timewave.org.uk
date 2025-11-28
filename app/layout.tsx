@@ -29,8 +29,8 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={`font-sans antialiased`}>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
-          <PersistentPlayer />
           <SiteHeader />
+          <PersistentPlayer />
           {children}
           <Toaster />
         </ThemeProvider>

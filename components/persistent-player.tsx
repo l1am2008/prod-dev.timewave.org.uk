@@ -103,50 +103,44 @@ export function PersistentPlayer() {
     <>
       <audio ref={audioRef} src={STREAM_URL} preload="none" />
 
-      <div className="fixed top-0 left-0 right-0 z-50 border-b border-border bg-card/95 backdrop-blur-sm shadow-lg">
-        <div className="container mx-auto px-4 py-3">
+      {/* Hero player section - similar to Upbeat */}
+      <div
+        className="fixed top-0 left-0 right-0 z-40 border-b"
+        style={{
+          backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.7), rgba(0,0,0,0.9)), url(${nowPlaying?.song.art || "/placeholder.svg"})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
+      >
+        <div className="container mx-auto px-6 py-8">
+          {/* Large song/presenter display */}
           <div className="flex items-center gap-6">
-            {/* Album art with live indicator */}
-            <div className="relative flex-shrink-0">
-              <img
-                src={nowPlaying?.song.art || "/placeholder.svg?height=64&width=64"}
-                alt="Now playing"
-                className="w-16 h-16 rounded-lg"
-              />
-              {livePresenter && (
-                <div className="absolute -top-1 -left-1 bg-red-600 text-white text-xs font-bold px-2 py-0.5 rounded flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></span>
-                  LIVE
-                </div>
-              )}
-            </div>
+            {/* Left side - Song title and presenter info */}
+            <div className="flex-1">
+              <h1 className="text-4xl md:text-5xl font-bold text-white mb-2 tracking-tight">
+                {nowPlaying?.song.title || "Timewave Radio"}
+              </h1>
+              <p className="text-xl text-white/80 mb-3">{nowPlaying?.song.artist || "Loading..."}</p>
 
-            {/* Now playing info with live presenter on the left */}
-            <div className="flex-1 min-w-0 space-y-1">
-              <p className="font-medium text-lg truncate">{nowPlaying?.song.title || "Timewave Radio"}</p>
-              <p className="text-sm text-muted-foreground truncate">{nowPlaying?.song.artist || "Loading..."}</p>
-
-              {/* Live presenter info inline with song metadata */}
+              {/* Live presenter prominently displayed */}
               {livePresenter && (
-                <Link href={`/user/${livePresenter.username}`}>
-                  <div className="flex items-center gap-2 mt-1 text-sm hover:opacity-80 transition-opacity">
-                    <span className="flex h-2 w-2 relative">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
-                    </span>
-                    {livePresenter.avatar_url ? (
-                      <img
-                        src={livePresenter.avatar_url || "/placeholder.svg"}
-                        alt={livePresenter.username}
-                        className="w-6 h-6 rounded-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center">
-                        <span className="text-xs font-bold">{livePresenter.username.charAt(0).toUpperCase()}</span>
-                      </div>
-                    )}
-                    <span className="text-red-500 font-medium">
-                      Live with{" "}
+                <Link
+                  href={`/user/${livePresenter.username}`}
+                  className="inline-flex items-center gap-3 hover:opacity-80 transition-opacity"
+                >
+                  <img
+                    src={livePresenter.avatar_url || "/placeholder.svg"}
+                    alt={livePresenter.username}
+                    className="w-12 h-12 rounded-full object-cover border-2 border-red-500"
+                  />
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-red-500 font-semibold text-sm flex items-center gap-1.5">
+                        <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
+                        LIVE
+                      </span>
+                    </div>
+                    <span className="text-white font-medium">
                       {livePresenter.first_name && livePresenter.last_name
                         ? `${livePresenter.first_name} ${livePresenter.last_name}`
                         : livePresenter.username}
@@ -156,38 +150,60 @@ export function PersistentPlayer() {
               )}
             </div>
 
-            {/* Player controls on the right */}
-            <div className="flex items-center gap-4 flex-shrink-0">
-              <Button size="lg" onClick={togglePlay} className="rounded-full w-12 h-12 bg-blue-600 hover:bg-blue-700">
-                {isPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5 ml-0.5" />}
+            {/* Right side - Album art */}
+            <div className="hidden md:block relative flex-shrink-0">
+              <img
+                src={nowPlaying?.song.art || "/placeholder.svg?height=200&width=200"}
+                alt="Album art"
+                className="w-40 h-40 rounded-lg shadow-2xl object-cover"
+              />
+              {livePresenter && (
+                <div className="absolute -top-2 -right-2 bg-red-600 text-white text-xs font-bold px-2 py-1 rounded-md flex items-center gap-1 shadow-lg">
+                  <span className="w-2 h-2 bg-white rounded-full animate-pulse"></span>
+                  LIVE
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Horizontal control bar below - matching Upbeat style */}
+          <div className="flex items-center gap-6 mt-6">
+            <Button
+              size="lg"
+              onClick={togglePlay}
+              className="rounded-full w-14 h-14 bg-blue-600 hover:bg-blue-700 shadow-lg"
+            >
+              {isPlaying ? <Pause className="h-6 w-6" /> : <Play className="h-6 w-6 ml-0.5" />}
+            </Button>
+
+            <div className="flex items-center gap-3 flex-1">
+              <Button
+                size="icon"
+                variant="ghost"
+                onClick={toggleMute}
+                className="h-10 w-10 text-white hover:bg-white/10"
+              >
+                {isMuted ? <VolumeX className="h-5 w-5" /> : <Volume2 className="h-5 w-5" />}
               </Button>
+              <Slider
+                value={[isMuted ? 0 : volume]}
+                onValueChange={(value) => setVolume(value[0])}
+                max={100}
+                step={1}
+                className="w-32 [&_[role=slider]]:bg-white"
+              />
+            </div>
 
-              <div className="hidden md:flex items-center gap-2">
-                <Button size="icon" variant="ghost" onClick={toggleMute} className="h-8 w-8">
-                  {isMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
-                </Button>
-                <Slider
-                  value={[isMuted ? 0 : volume]}
-                  onValueChange={(value) => setVolume(value[0])}
-                  max={100}
-                  step={1}
-                  className="w-24"
-                />
-              </div>
-
-              <div className="hidden sm:block text-sm text-muted-foreground whitespace-nowrap">
-                <span className="inline-flex items-center gap-1">
-                  <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-                  {nowPlaying?.listeners.current || 0} listeners
-                </span>
-              </div>
+            <div className="flex items-center gap-2 text-sm text-white/90">
+              <span className="w-2.5 h-2.5 bg-green-500 rounded-full"></span>
+              <span>{nowPlaying?.listeners.current || 0} listeners</span>
             </div>
           </div>
         </div>
       </div>
 
       {/* Spacer to prevent content from going under fixed player */}
-      <div className="h-20"></div>
+      <div className="h-60"></div>
     </>
   )
 }

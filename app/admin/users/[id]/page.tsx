@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Switch } from "@/components/ui/switch"
 import { ArrowLeft, Save, UserPlus } from "lucide-react"
 import Link from "next/link"
 import { useToast } from "@/hooks/use-toast"
@@ -25,6 +26,8 @@ interface UserDetails {
   encoder_id: string
   encoder_active: boolean
   created_at: string
+  can_create_shows: boolean
+  can_create_articles: boolean
 }
 
 export default function UserDetailsPage() {
@@ -37,6 +40,8 @@ export default function UserDetailsPage() {
   const [promoting, setPromoting] = useState(false)
   const [role, setRole] = useState("")
   const [staffRole, setStaffRole] = useState("")
+  const [canCreateShows, setCanCreateShows] = useState(false)
+  const [canCreateArticles, setCanCreateArticles] = useState(false)
 
   useEffect(() => {
     fetchUser()
@@ -56,6 +61,8 @@ export default function UserDetailsPage() {
         setUser(data)
         setRole(data.role)
         setStaffRole(data.staff_role || "")
+        setCanCreateShows(data.can_create_shows || false)
+        setCanCreateArticles(data.can_create_articles || false)
       }
     } catch (error) {
       console.error("[v0] Failed to fetch user:", error)
@@ -98,6 +105,47 @@ export default function UserDetailsPage() {
       toast({
         title: "Error",
         description: "Failed to update user",
+        variant: "destructive",
+      })
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const handlePermissionsUpdate = async () => {
+    setSaving(true)
+    try {
+      const token = localStorage.getItem("admin_token")
+      const response = await fetch(`/api/admin/users/${params.id}/permissions`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          can_create_shows: canCreateShows,
+          can_create_articles: canCreateArticles,
+        }),
+      })
+
+      if (response.ok) {
+        toast({
+          title: "Success",
+          description: "Permissions updated successfully",
+        })
+        fetchUser()
+      } else {
+        const data = await response.json()
+        toast({
+          title: "Error",
+          description: data.error || "Failed to update permissions",
+          variant: "destructive",
+        })
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update permissions",
         variant: "destructive",
       })
     } finally {
@@ -270,6 +318,35 @@ export default function UserDetailsPage() {
                 {promoting ? "Creating Encoder..." : "Promote to Staff & Create Encoder"}
               </Button>
             )}
+          </CardContent>
+        </Card>
+
+        <Card className="md:col-span-2">
+          <CardHeader>
+            <CardTitle>Content Permissions</CardTitle>
+            <CardDescription>Control what content this user can create</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label htmlFor="can-create-shows">Can Create Radio Shows</Label>
+                <p className="text-sm text-muted-foreground">Allow this user to submit radio show proposals</p>
+              </div>
+              <Switch id="can-create-shows" checked={canCreateShows} onCheckedChange={setCanCreateShows} />
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label htmlFor="can-create-articles">Can Create News Articles</Label>
+                <p className="text-sm text-muted-foreground">Allow this user to submit news articles for review</p>
+              </div>
+              <Switch id="can-create-articles" checked={canCreateArticles} onCheckedChange={setCanCreateArticles} />
+            </div>
+
+            <Button onClick={handlePermissionsUpdate} disabled={saving} className="w-full">
+              <Save className="h-4 w-4 mr-2" />
+              {saving ? "Saving..." : "Update Permissions"}
+            </Button>
           </CardContent>
         </Card>
 

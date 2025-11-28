@@ -2,20 +2,22 @@ import { type NextRequest, NextResponse } from "next/server"
 import { query } from "@/lib/db"
 import { requireAdmin } from "@/lib/middleware"
 
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const authCheck = await requireAdmin(request)
   if (!authCheck.valid) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
+  const { id } = await params
+
   try {
-    console.log("[v0] Fetching permissions for user:", params.id)
+    console.log("[v0] Fetching permissions for user:", id)
     const result = (await query(`SELECT can_create_shows, can_create_articles FROM users WHERE id = ?`, [
-      params.id,
+      id,
     ])) as Array<{ can_create_shows: boolean; can_create_articles: boolean }>
 
     if (!result || result.length === 0) {
-      console.log("[v0] User not found:", params.id)
+      console.log("[v0] User not found:", id)
       return NextResponse.json({ error: "User not found" }, { status: 404 })
     }
 
@@ -42,25 +44,23 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
   }
 }
 
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   console.log("[v0] PUT request received for permissions")
-  console.log("[v0] Params:", JSON.stringify(params))
-  console.log("[v0] params.id:", params.id, "type:", typeof params.id)
 
   const authCheck = await requireAdmin(request)
   if (!authCheck.valid) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
+  const { id } = await params
+  console.log("[v0] User ID from params:", id, "type:", typeof id)
+
   try {
     const body = await request.json()
     console.log("[v0] Raw request body:", JSON.stringify(body))
-    console.log("[v0] Body keys:", Object.keys(body))
-    console.log("[v0] body.can_create_shows:", body.can_create_shows, "type:", typeof body.can_create_shows)
-    console.log("[v0] body.can_create_articles:", body.can_create_articles, "type:", typeof body.can_create_articles)
 
-    if (!params.id) {
-      console.error("[v0] params.id is undefined or empty!")
+    if (!id) {
+      console.error("[v0] User ID is undefined or empty!")
       return NextResponse.json({ error: "User ID is required" }, { status: 400 })
     }
 
@@ -68,25 +68,19 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     const can_create_articles = body.can_create_articles === true ? 1 : 0
 
     console.log(
-      "[v0] Converted values - can_create_shows:",
+      "[v0] Updating permissions - user:",
+      id,
+      "can_create_shows:",
       can_create_shows,
       "can_create_articles:",
       can_create_articles,
-    )
-    console.log("[v0] Updating permissions for user:", params.id)
-
-    const queryParams = [can_create_shows, can_create_articles, params.id]
-    console.log("[v0] Query params array:", JSON.stringify(queryParams))
-    console.log(
-      "[v0] Query params types:",
-      queryParams.map((p) => typeof p),
     )
 
     await query(
       `UPDATE users 
       SET can_create_shows = ?, can_create_articles = ?
       WHERE id = ?`,
-      queryParams,
+      [can_create_shows, can_create_articles, id],
     )
 
     console.log("[v0] Permissions updated successfully")

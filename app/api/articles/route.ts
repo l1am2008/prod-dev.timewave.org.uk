@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { query } from "@/lib/db"
 import { verifyToken } from "@/lib/auth"
-import { sendEmail, AdminArticlePendingApprovalEmail } from "@/lib/email"
+import { sendArticleSubmissionEmail } from "@/lib/email"
 
 export async function GET() {
   try {
@@ -35,7 +35,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Invalid token" }, { status: 401 })
     }
 
-    const userDetails: any[] = await query(`SELECT can_create_articles, role FROM users WHERE id = ?`, [user.id])
+    const userDetails: any[] = await query(`SELECT can_create_articles, role, first_name FROM users WHERE id = ?`, [
+      user.id,
+    ])
 
     if (
       !userDetails[0]?.can_create_articles &&
@@ -68,15 +70,10 @@ export async function POST(request: NextRequest) {
       const authorName = userDetails[0]?.first_name || user.username
 
       for (const admin of admins) {
-        await sendEmail({
-          to: admin.email,
-          subject: "New Article Pending Approval - Timewave Radio",
-          react: AdminArticlePendingApprovalEmail({
-            adminName: admin.first_name || "Admin",
-            articleTitle: title,
-            authorName,
-            articleId: result.insertId,
-          }),
+        await sendArticleSubmissionEmail(admin.email, admin.first_name || "Admin", {
+          title,
+          authorName,
+          articleId: result.insertId,
         })
       }
     }

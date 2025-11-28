@@ -1,11 +1,11 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { query } from "@/lib/db"
 import { requireAdmin } from "@/lib/middleware"
-import { sendEmail, ArticleApprovedEmail, ArticleRejectedEmail } from "@/lib/email"
+import { sendArticleApprovalEmail } from "@/lib/email"
 
 export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
   const authCheck = await requireAdmin(request)
-  if (authCheck) return authCheck
+  if (!authCheck.valid) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
   try {
     const { action, rejection_reason } = await request.json()
@@ -32,14 +32,10 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
         [adminId, params.id],
       )
 
-      await sendEmail({
-        to: article.email,
-        subject: "Your Article Has Been Approved - Timewave Radio",
-        react: ArticleApprovedEmail({
-          authorName: article.first_name || "there",
-          articleTitle: article.title,
-          articleSlug: article.slug,
-        }),
+      await sendArticleApprovalEmail(article.email, article.first_name || "there", {
+        title: article.title,
+        slug: article.slug,
+        approved: true,
       })
     } else if (action === "reject") {
       await query(
@@ -49,14 +45,11 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
         [rejection_reason, params.id],
       )
 
-      await sendEmail({
-        to: article.email,
-        subject: "Article Update - Timewave Radio",
-        react: ArticleRejectedEmail({
-          authorName: article.first_name || "there",
-          articleTitle: article.title,
-          rejectionReason: rejection_reason,
-        }),
+      await sendArticleApprovalEmail(article.email, article.first_name || "there", {
+        title: article.title,
+        slug: article.slug,
+        approved: false,
+        rejectionReason: rejection_reason,
       })
     }
 

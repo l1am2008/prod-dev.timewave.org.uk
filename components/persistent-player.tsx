@@ -105,7 +105,7 @@ export function PersistentPlayer() {
 
       {/* Hero player section - similar to Upbeat */}
       <div
-        className="fixed top-0 left-0 right-0 z-40 border-b"
+        className="border-b"
         style={{
           backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.7), rgba(0,0,0,0.9)), url(${nowPlaying?.song.art || "/placeholder.svg"})`,
           backgroundSize: "cover",
@@ -201,9 +201,6 @@ export function PersistentPlayer() {
           </div>
         </div>
       </div>
-
-      {/* Spacer to prevent content from going under fixed player */}
-      <div className="h-60"></div>
     </>
   )
 }

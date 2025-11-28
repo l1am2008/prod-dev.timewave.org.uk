@@ -49,8 +49,17 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
   }
 
   try {
-    const { can_create_shows, can_create_articles } = await request.json()
+    const body = await request.json()
+    const can_create_shows = body.can_create_shows === true
+    const can_create_articles = body.can_create_articles === true
+
     console.log("[v0] Updating permissions for user:", params.id, { can_create_shows, can_create_articles })
+    console.log(
+      "[v0] Type check - can_create_shows:",
+      typeof can_create_shows,
+      "can_create_articles:",
+      typeof can_create_articles,
+    )
 
     await query(
       `UPDATE users 

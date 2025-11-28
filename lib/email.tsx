@@ -307,3 +307,150 @@ export async function sendShowApprovalEmail(
     console.error("[v0] Failed to send show approval email:", error)
   }
 }
+
+export async function sendArticleSubmissionEmail(
+  adminEmail: string,
+  adminName: string,
+  articleDetails: {
+    title: string
+    authorName: string
+    articleId: number
+  },
+) {
+  const transport = getTransporter()
+
+  if (!transport) {
+    console.log("[v0] Skipping article submission email - SMTP not configured")
+    return
+  }
+
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3030"
+
+  try {
+    await transport.sendMail({
+      from: `"Timewave Radio" <${process.env.SMTP_USER}>`,
+      to: adminEmail,
+      subject: `New Article Submission: ${articleDetails.title}`,
+      html: `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <style>
+              body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+              .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+              .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+              .content { background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px; }
+              .article-details { background: white; padding: 20px; border-radius: 5px; margin: 20px 0; }
+              .button { display: inline-block; padding: 12px 30px; background: #667eea; color: white; text-decoration: none; border-radius: 5px; margin: 10px 5px; }
+              .footer { text-align: center; margin-top: 20px; color: #666; font-size: 12px; }
+            </style>
+          </head>
+          <body>
+            <div class="container">
+              <div class="header">
+                <h1>New Article Submission</h1>
+              </div>
+              <div class="content">
+                <p>Hi ${adminName},</p>
+                <p>A new article has been submitted and is awaiting your approval.</p>
+                <div class="article-details">
+                  <h3>${articleDetails.title}</h3>
+                  <p><strong>Author:</strong> ${articleDetails.authorName}</p>
+                </div>
+                <p style="text-align: center;">
+                  <a href="${appUrl}/admin/articles" class="button">Review Articles</a>
+                </p>
+              </div>
+              <div class="footer">
+                <p>&copy; ${new Date().getFullYear()} Timewave Radio. All rights reserved.</p>
+              </div>
+            </div>
+          </body>
+        </html>
+      `,
+    })
+    console.log("[v0] Article submission email sent to:", adminEmail)
+  } catch (error) {
+    console.error("[v0] Failed to send article submission email:", error)
+  }
+}
+
+export async function sendArticleApprovalEmail(
+  authorEmail: string,
+  authorName: string,
+  articleDetails: {
+    title: string
+    slug: string
+    approved: boolean
+    rejectionReason?: string
+  },
+) {
+  const transport = getTransporter()
+
+  if (!transport) {
+    console.log("[v0] Skipping article approval email - SMTP not configured")
+    return
+  }
+
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3030"
+
+  try {
+    await transport.sendMail({
+      from: `"Timewave Radio" <${process.env.SMTP_USER}>`,
+      to: authorEmail,
+      subject: articleDetails.approved
+        ? `Article Published: ${articleDetails.title}`
+        : `Article Not Approved: ${articleDetails.title}`,
+      html: `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <style>
+              body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+              .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+              .header { background: ${articleDetails.approved ? "linear-gradient(135deg, #22c55e 0%, #16a34a 100%)" : "linear-gradient(135deg, #ef4444 0%, #dc2626 100%)"}; color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+              .content { background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px; }
+              .article-details { background: white; padding: 20px; border-radius: 5px; margin: 20px 0; }
+              .button { display: inline-block; padding: 12px 30px; background: #667eea; color: white; text-decoration: none; border-radius: 5px; margin: 10px 5px; }
+              .footer { text-align: center; margin-top: 20px; color: #666; font-size: 12px; }
+            </style>
+          </head>
+          <body>
+            <div class="container">
+              <div class="header">
+                <h1>${articleDetails.approved ? "Article Published!" : "Article Not Approved"}</h1>
+              </div>
+              <div class="content">
+                <p>Hi ${authorName},</p>
+                ${
+                  articleDetails.approved
+                    ? `<p>Great news! Your article has been approved and is now published on Timewave Radio.</p>`
+                    : `<p>Your article submission has not been approved at this time.</p>`
+                }
+                <div class="article-details">
+                  <h3>${articleDetails.title}</h3>
+                  ${
+                    !articleDetails.approved && articleDetails.rejectionReason
+                      ? `<p><strong>Reason:</strong> ${articleDetails.rejectionReason}</p>`
+                      : ""
+                  }
+                </div>
+                ${
+                  articleDetails.approved
+                    ? `<p style="text-align: center;"><a href="${appUrl}/news/${articleDetails.slug}" class="button">View Article</a></p>`
+                    : `<p>If you have questions about this decision, please contact an administrator.</p>`
+                }
+              </div>
+              <div class="footer">
+                <p>&copy; ${new Date().getFullYear()} Timewave Radio. All rights reserved.</p>
+              </div>
+            </div>
+          </body>
+        </html>
+      `,
+    })
+    console.log("[v0] Article approval email sent to:", authorEmail)
+  } catch (error) {
+    console.error("[v0] Failed to send article approval email:", error)
+  }
+}

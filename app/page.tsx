@@ -61,9 +61,30 @@ async function getUpcomingShows() {
   }
 }
 
+async function getLatestArticle() {
+  try {
+    const articles: any[] = await query(
+      `SELECT 
+        a.id, a.title, a.slug, a.excerpt, a.featured_image, a.published_at,
+        u.username, u.first_name, u.last_name, u.avatar_url
+      FROM articles a
+      INNER JOIN users u ON a.user_id = u.id
+      WHERE a.approval_status = 'approved'
+      ORDER BY a.published_at DESC
+      LIMIT 1`,
+    )
+
+    return articles.length > 0 ? articles[0] : null
+  } catch (error) {
+    console.error("[v0] Failed to fetch latest article:", error)
+    return null
+  }
+}
+
 export default async function HomePage() {
   const livePresenter = await getLivePresenter()
   const upcomingShows = await getUpcomingShows()
+  const latestArticle = await getLatestArticle()
 
   return (
     <div className="min-h-screen bg-background">
@@ -82,7 +103,7 @@ export default async function HomePage() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <Link href={`/presenters/${livePresenter.id}`}>
+              <Link href={`/user/${livePresenter.username}`}>
                 <div className="flex items-center gap-4 p-4 bg-card border border-border rounded-lg hover:shadow-md transition-shadow cursor-pointer">
                   {livePresenter.avatar_url ? (
                     <img
@@ -107,6 +128,47 @@ export default async function HomePage() {
                     </p>
                   </div>
                   <Button>View Profile</Button>
+                </div>
+              </Link>
+            </CardContent>
+          </Card>
+        )}
+
+        {latestArticle && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Latest News</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Link href={`/news/${latestArticle.slug}`}>
+                <div className="flex flex-col md:flex-row gap-4 hover:shadow-md transition-shadow cursor-pointer">
+                  {latestArticle.featured_image && (
+                    <img
+                      src={latestArticle.featured_image || "/placeholder.svg"}
+                      alt={latestArticle.title}
+                      className="w-full md:w-48 h-48 object-cover rounded-lg"
+                    />
+                  )}
+                  <div className="flex-1">
+                    <h3 className="font-bold text-xl mb-2">{latestArticle.title}</h3>
+                    <p className="text-muted-foreground mb-2">{latestArticle.excerpt}</p>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      {latestArticle.avatar_url && (
+                        <img
+                          src={latestArticle.avatar_url || "/placeholder.svg"}
+                          alt={latestArticle.username}
+                          className="w-6 h-6 rounded-full"
+                        />
+                      )}
+                      <span>
+                        {latestArticle.first_name && latestArticle.last_name
+                          ? `${latestArticle.first_name} ${latestArticle.last_name}`
+                          : latestArticle.username}
+                      </span>
+                      <span>•</span>
+                      <span>{new Date(latestArticle.published_at).toLocaleDateString()}</span>
+                    </div>
+                  </div>
                 </div>
               </Link>
             </CardContent>

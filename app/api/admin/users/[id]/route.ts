@@ -19,7 +19,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       `SELECT 
         u.id, u.email, u.username, u.first_name, u.last_name, u.bio,
         u.role, u.staff_role, u.is_verified, u.newsletter_subscribed, 
-        u.created_at, u.avatar_url,
+        u.created_at, u.avatar_url, u.can_create_shows, u.can_create_articles,
         se.encoder_id, se.is_active as encoder_active
       FROM users u
       LEFT JOIN staff_encoders se ON u.id = se.user_id

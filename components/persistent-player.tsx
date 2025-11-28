@@ -183,35 +183,47 @@ export function PersistentPlayer() {
         ) : (
           <div className="container mx-auto px-4 py-3">
             <div className="flex items-center gap-4">
-              <img
-                src={nowPlaying?.song.art || "/placeholder.svg?height=56&width=56"}
-                alt="Now playing"
-                className="w-14 h-14 rounded-lg"
-              />
+              <div className="relative">
+                <img
+                  src={nowPlaying?.song.art || "/placeholder.svg?height=56&width=56"}
+                  alt="Now playing"
+                  className="w-14 h-14 rounded-lg"
+                />
+                {livePresenter && (
+                  <div className="absolute -top-1 -left-1 bg-red-600 text-white text-xs font-bold px-2 py-0.5 rounded flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></span>
+                    LIVE
+                  </div>
+                )}
+              </div>
               <div className="flex-1 min-w-0">
                 <p className="font-medium truncate">{nowPlaying?.song.title || "Timewave Radio"}</p>
                 <p className="text-sm text-muted-foreground truncate">{nowPlaying?.song.artist || "Loading..."}</p>
                 {livePresenter && (
-                  <p className="text-xs text-yellow-500">DEBUG: Presenter detected - {JSON.stringify(livePresenter)}</p>
+                  <p className="text-xs text-red-500 flex items-center gap-1 mt-0.5">
+                    <span className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse"></span>
+                    Live with{" "}
+                    <Link href={`/user/${livePresenter.username}`} className="hover:underline font-medium">
+                      {livePresenter.first_name && livePresenter.last_name
+                        ? `${livePresenter.first_name} ${livePresenter.last_name}`
+                        : livePresenter.username}
+                    </Link>
+                  </p>
                 )}
               </div>
 
               {livePresenter && (
-                <Link href={`/user/${livePresenter.username}`}>
-                  <div className="flex items-center gap-2 px-3 py-2 bg-red-500/10 border border-red-500/20 rounded-lg hover:bg-red-500/20 transition-colors cursor-pointer">
-                    <span className="flex h-2 w-2 relative">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
-                    </span>
+                <Link href={`/user/${livePresenter.username}`} className="hidden md:block">
+                  <div className="flex items-center gap-3 px-4 py-2 bg-red-500/10 border border-red-500/20 rounded-lg hover:bg-red-500/20 transition-colors cursor-pointer">
                     {livePresenter.avatar_url ? (
                       <img
                         src={livePresenter.avatar_url || "/placeholder.svg"}
                         alt={livePresenter.username}
-                        className="w-8 h-8 rounded-full object-cover"
+                        className="w-10 h-10 rounded-full object-cover"
                       />
                     ) : (
-                      <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                        <span className="text-xs font-bold">{livePresenter.username.charAt(0).toUpperCase()}</span>
+                      <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                        <span className="text-sm font-bold">{livePresenter.username.charAt(0).toUpperCase()}</span>
                       </div>
                     )}
                     <div className="text-sm">
@@ -220,7 +232,10 @@ export function PersistentPlayer() {
                           ? `${livePresenter.first_name} ${livePresenter.last_name}`
                           : livePresenter.username}
                       </p>
-                      <p className="text-xs text-muted-foreground">Live Now</p>
+                      <p className="text-xs text-red-500 flex items-center gap-1 mt-0.5">
+                        <span className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse"></span>
+                        Live Now
+                      </p>
                     </div>
                   </div>
                 </Link>

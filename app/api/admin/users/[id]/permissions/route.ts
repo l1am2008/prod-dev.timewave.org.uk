@@ -43,6 +43,10 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
 }
 
 export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+  console.log("[v0] PUT request received for permissions")
+  console.log("[v0] Params:", JSON.stringify(params))
+  console.log("[v0] params.id:", params.id, "type:", typeof params.id)
+
   const authCheck = await requireAdmin(request)
   if (!authCheck.valid) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
@@ -55,6 +59,11 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     console.log("[v0] body.can_create_shows:", body.can_create_shows, "type:", typeof body.can_create_shows)
     console.log("[v0] body.can_create_articles:", body.can_create_articles, "type:", typeof body.can_create_articles)
 
+    if (!params.id) {
+      console.error("[v0] params.id is undefined or empty!")
+      return NextResponse.json({ error: "User ID is required" }, { status: 400 })
+    }
+
     const can_create_shows = body.can_create_shows === true ? 1 : 0
     const can_create_articles = body.can_create_articles === true ? 1 : 0
 
@@ -66,11 +75,18 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     )
     console.log("[v0] Updating permissions for user:", params.id)
 
+    const queryParams = [can_create_shows, can_create_articles, params.id]
+    console.log("[v0] Query params array:", JSON.stringify(queryParams))
+    console.log(
+      "[v0] Query params types:",
+      queryParams.map((p) => typeof p),
+    )
+
     await query(
       `UPDATE users 
       SET can_create_shows = ?, can_create_articles = ?
       WHERE id = ?`,
-      [can_create_shows, can_create_articles, params.id],
+      queryParams,
     )
 
     console.log("[v0] Permissions updated successfully")

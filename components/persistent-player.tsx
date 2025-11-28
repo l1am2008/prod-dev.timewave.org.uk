@@ -36,7 +36,9 @@ export function PersistentPlayer() {
   const [isMinimized, setIsMinimized] = useState(true)
   const [nowPlaying, setNowPlaying] = useState<NowPlayingData | null>(null)
   const [livePresenter, setLivePresenter] = useState<LivePresenter | null>(null)
+  const [showMinimizedPlayer, setShowMinimizedPlayer] = useState(false)
   const audioRef = useRef<HTMLAudioElement>(null)
+  const fullPlayerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     if (audioRef.current) {
@@ -54,25 +56,21 @@ export function PersistentPlayer() {
           listeners: data.listeners,
         })
       } catch (error) {
-        console.error("[v0] Failed to fetch now playing:", error)
+        console.error("Failed to fetch now playing:", error)
       }
     }
 
     const fetchLivePresenter = async () => {
       try {
-        console.log("[v0] Fetching live presenter from client...")
         const response = await fetch("/api/live-presenter")
         const data = await response.json()
-        console.log("[v0] Live presenter API response:", data)
         if (data.is_live) {
-          console.log("[v0] Setting live presenter:", data.presenter)
           setLivePresenter(data.presenter)
         } else {
-          console.log("[v0] No live presenter found")
           setLivePresenter(null)
         }
       } catch (error) {
-        console.error("[v0] Failed to fetch live presenter:", error)
+        console.error("Failed to fetch live presenter:", error)
       }
     }
 
@@ -86,6 +84,27 @@ export function PersistentPlayer() {
       clearInterval(presenterInterval)
     }
   }, [])
+
+  useEffect(() => {
+    if (!fullPlayerRef.current || isMinimized) return
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setShowMinimizedPlayer(!entry.isIntersecting)
+      },
+      {
+        threshold: 0.1,
+      },
+    )
+
+    observer.observe(fullPlayerRef.current)
+
+    return () => {
+      if (fullPlayerRef.current) {
+        observer.unobserve(fullPlayerRef.current)
+      }
+    }
+  }, [isMinimized])
 
   const togglePlay = () => {
     if (audioRef.current) {
@@ -106,15 +125,75 @@ export function PersistentPlayer() {
     }
   }
 
-  console.log("[v0] Player state - livePresenter:", livePresenter, "isMinimized:", isMinimized)
-
   if (!isPlaying && !isMinimized) return null
 
   return (
     <>
       <audio ref={audioRef} src={STREAM_URL} preload="none" />
 
+      {showMinimizedPlayer && !isMinimized && isPlaying && (
+        <div className="fixed bottom-4 right-4 w-80 z-50">
+          <div className="bg-card border border-border rounded-2xl shadow-2xl p-4 space-y-3">
+            <div className="flex items-center gap-3">
+              <div className="relative">
+                <img
+                  src={nowPlaying?.song.art || "/placeholder.svg?height=48&width=48"}
+                  alt="Now playing"
+                  className="w-12 h-12 rounded-lg"
+                />
+                {livePresenter && (
+                  <span className="absolute -top-1 -right-1 flex h-3 w-3">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+                  </span>
+                )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-medium text-sm truncate">{nowPlaying?.song.title || "Timewave Radio"}</p>
+                <p className="text-xs text-muted-foreground truncate">{nowPlaying?.song.artist || "Loading..."}</p>
+              </div>
+              <div className="flex items-center gap-1">
+                <Button size="icon" variant="ghost" onClick={togglePlay} className="h-8 w-8">
+                  {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+                </Button>
+              </div>
+            </div>
+
+            {livePresenter && (
+              <Link href={`/user/${livePresenter.username}`}>
+                <div className="flex items-center gap-2 px-2 py-1.5 bg-red-500/10 border border-red-500/20 rounded-lg hover:bg-red-500/20 transition-colors cursor-pointer">
+                  <span className="flex h-2 w-2 relative">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                  </span>
+                  {livePresenter.avatar_url ? (
+                    <img
+                      src={livePresenter.avatar_url || "/placeholder.svg"}
+                      alt={livePresenter.username}
+                      className="w-6 h-6 rounded-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center">
+                      <span className="text-xs font-bold">{livePresenter.username.charAt(0).toUpperCase()}</span>
+                    </div>
+                  )}
+                  <div className="text-xs flex-1 min-w-0">
+                    <p className="font-medium leading-none truncate">
+                      {livePresenter.first_name && livePresenter.last_name
+                        ? `${livePresenter.first_name} ${livePresenter.last_name}`
+                        : livePresenter.username}
+                    </p>
+                    <p className="text-muted-foreground">Live Now</p>
+                  </div>
+                </div>
+              </Link>
+            )}
+          </div>
+        </div>
+      )}
+
       <div
+        ref={fullPlayerRef}
         className={cn(
           "fixed z-50 transition-all duration-300",
           isMinimized ? "bottom-4 left-4 w-80" : "bottom-0 left-0 right-0 border-t border-border bg-card shadow-lg",

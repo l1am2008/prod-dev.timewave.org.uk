@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Radio, TrendingUp, Activity, Calendar } from "lucide-react"
+import { Radio, TrendingUp, Activity, Calendar, Newspaper } from "lucide-react"
 
 interface StaffProfile {
   username: string
@@ -145,7 +145,7 @@ export default function StaffDashboard() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Your Role</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            <TrendingUp className="h-5 w-5" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{profile?.staff_role || "Staff"}</div>
@@ -167,6 +167,24 @@ export default function StaffDashboard() {
         <CardContent>
           <p className="text-sm text-muted-foreground">
             Click here to add new shows, edit existing ones, and track approval status.
+          </p>
+        </CardContent>
+      </Card>
+
+      <Card
+        className="cursor-pointer hover:bg-accent transition-colors"
+        onClick={() => (window.location.href = "/staff/articles")}
+      >
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Newspaper className="h-5 w-5" />
+            Write Articles
+          </CardTitle>
+          <CardDescription>Create and manage your news articles</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-muted-foreground">
+            Click here to write new articles, edit drafts, and track publication status.
           </p>
         </CardContent>
       </Card>

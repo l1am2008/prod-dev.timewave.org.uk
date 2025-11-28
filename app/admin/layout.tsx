@@ -5,7 +5,7 @@ import { useEffect } from "react"
 import { useRouter, usePathname } from "next/navigation"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { Users, Mail, Settings, LayoutDashboard, Calendar } from "lucide-react"
+import { Users, Mail, Settings, LayoutDashboard, Calendar, Newspaper } from "lucide-react"
 
 export default function AdminLayout({
   children,
@@ -73,6 +73,12 @@ export default function AdminLayout({
               <Button variant="ghost" className="w-full justify-start">
                 <Calendar className="h-4 w-4 mr-2" />
                 Show Management
+              </Button>
+            </Link>
+            <Link href="/admin/articles">
+              <Button variant="ghost" className="w-full justify-start">
+                <Newspaper className="h-4 w-4 mr-2" />
+                Article Management
               </Button>
             </Link>
             <Link href="/admin/newsletter">

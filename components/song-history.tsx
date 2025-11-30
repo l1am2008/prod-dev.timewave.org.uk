@@ -24,10 +24,15 @@ export function SongHistory() {
 
   const fetchHistory = async () => {
     try {
+      console.log("[v0] Fetching song history from API...")
       const response = await fetch("/api/history/track")
+      console.log("[v0] History API response status:", response.status)
       if (response.ok) {
         const data = await response.json()
+        console.log("[v0] History data received:", data.length, "tracks")
         setHistory(data)
+      } else {
+        console.error("[v0] History API returned error:", response.status)
       }
     } catch (error) {
       console.error("[v0] Failed to fetch history:", error)
@@ -72,25 +77,29 @@ export function SongHistory() {
       </CardHeader>
       <CardContent>
         <div className="space-y-3">
-          {history.map((track) => (
-            <div key={track.id} className="flex items-center gap-3 p-3 hover:bg-accent rounded-lg transition-colors">
-              <img
-                src={track.album_art_url || "/placeholder.svg?height=48&width=48"}
-                alt={track.song_title}
-                className="w-12 h-12 rounded"
-              />
-              <div className="flex-1 min-w-0">
-                <p className="font-medium truncate">{track.song_title}</p>
-                <p className="text-sm text-muted-foreground truncate">{track.song_artist}</p>
+          {history.length === 0 ? (
+            <p className="text-sm text-muted-foreground text-center py-4">No song history yet</p>
+          ) : (
+            history.map((track) => (
+              <div key={track.id} className="flex items-center gap-3 p-3 hover:bg-accent rounded-lg transition-colors">
+                <img
+                  src={track.album_art_url || "/placeholder.svg?height=48&width=48"}
+                  alt={track.song_title}
+                  className="w-12 h-12 rounded"
+                />
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium truncate">{track.song_title}</p>
+                  <p className="text-sm text-muted-foreground truncate">{track.song_artist}</p>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  {new Date(track.played_at).toLocaleTimeString("en-US", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </p>
               </div>
-              <p className="text-xs text-muted-foreground">
-                {new Date(track.played_at).toLocaleTimeString("en-US", {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}
-              </p>
-            </div>
-          ))}
+            ))
+          )}
         </div>
       </CardContent>
     </Card>

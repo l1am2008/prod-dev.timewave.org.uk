@@ -4,7 +4,9 @@ import { requireAdmin } from "@/lib/middleware"
 
 export async function GET(request: NextRequest) {
   const authCheck = await requireAdmin(request)
-  if (authCheck) return authCheck
+  if (!authCheck.valid) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  }
 
   try {
     const status = request.nextUrl.searchParams.get("status") || "pending"

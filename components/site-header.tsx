@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { Calendar, Users, User, Settings, LogOut } from "lucide-react"
+import { Calendar, Users, User, Settings, LogOut, Newspaper } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 
@@ -102,6 +102,7 @@ export function SiteHeader() {
           </Link>
           <Link href="/news">
             <Button variant="ghost" size="sm">
+              <Newspaper className="h-4 w-4 mr-2" />
               News
             </Button>
           </Link>

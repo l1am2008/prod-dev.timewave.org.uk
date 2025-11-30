@@ -59,7 +59,7 @@ export function ActiveUsersFooter() {
   if (activeUsers.length === 0) return null
 
   return (
-    <div className="border-t border-border bg-card">
+    <div className="fixed bottom-0 left-0 right-0 border-t border-border bg-card z-30">
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2 text-sm font-medium">

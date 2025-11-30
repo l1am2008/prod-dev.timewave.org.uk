@@ -21,8 +21,9 @@ async function getArticle(slug: string) {
   }
 }
 
-export default async function ArticlePage({ params }: { params: { slug: string } }) {
-  const article = await getArticle(params.slug)
+export default async function ArticlePage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params
+  const article = await getArticle(slug)
 
   if (!article) {
     notFound()

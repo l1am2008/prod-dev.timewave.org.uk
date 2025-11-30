@@ -9,8 +9,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ user
       `SELECT 
         u.id, u.username, u.first_name, u.last_name, u.avatar_url, u.bio,
         u.favorite_song_title, u.favorite_song_artist, u.favorite_song_itunes_id,
-        u.favorite_song_artwork, u.role, u.staff_role, u.created_at,
-        (SELECT COUNT(*) FROM user_friends WHERE user_id = u.id AND status = 'accepted') as friend_count
+        u.favorite_song_artwork, u.role, u.staff_role, u.created_at
       FROM users u
       WHERE u.username = ?`,
       [username],
@@ -26,7 +25,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ user
 
     return NextResponse.json(profile)
   } catch (error) {
-    console.error("[v0] Failed to fetch user profile:", error)
+    console.error("Failed to fetch user profile:", error)
     return NextResponse.json({ error: "Failed to fetch profile" }, { status: 500 })
   }
 }

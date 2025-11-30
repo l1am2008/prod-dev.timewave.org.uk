@@ -122,7 +122,6 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
     }
 
     // Delete related records first (foreign key constraints)
-    await query("DELETE FROM user_friends WHERE user_id = ? OR friend_id = ?", [id, id])
     await query("DELETE FROM active_users WHERE user_id = ?", [id])
     await query("DELETE FROM password_resets WHERE user_id = ?", [id])
     await query("DELETE FROM profile_views WHERE viewer_id = ? OR viewed_user_id = ?", [id, id])

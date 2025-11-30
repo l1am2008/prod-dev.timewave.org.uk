@@ -8,6 +8,7 @@ import { SiteHeader } from "@/components/site-header"
 import { Toaster } from "@/components/ui/sonner"
 import { ActiveUsersFooter } from "@/components/active-users-footer"
 import { ThemeEffects } from "@/components/theme-effects"
+import { SiteFooter } from "@/components/site-footer"
 import { query } from "@/lib/db"
 import "./globals.css"
 
@@ -25,14 +26,10 @@ export const metadata: Metadata = {
 
 async function getActiveTheme() {
   try {
-    console.log("[v0] Fetching theme directly from database")
     const result = await query("SELECT setting_value FROM site_settings WHERE setting_key = 'active_theme'")
-
     const theme = result.length > 0 ? result[0].setting_value : "default"
-    console.log("[v0] Active theme from DB:", theme)
     return theme
   } catch (error) {
-    console.error("[v0] Failed to fetch theme from database:", error)
     return "default"
   }
 }
@@ -52,6 +49,7 @@ export default async function RootLayout({
           <PersistentPlayer />
           {children}
           <ActiveUsersFooter />
+          <SiteFooter />
           <ThemeEffects theme={activeTheme} />
           <Toaster />
         </ThemeProvider>

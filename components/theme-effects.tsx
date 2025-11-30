@@ -12,10 +12,8 @@ export function ThemeEffects({ theme: initialTheme }: ThemeEffectsProps) {
 
   useEffect(() => {
     setMounted(true)
-    console.log("[v0] Theme effects mounted with theme:", theme)
 
     const handleThemeChange = (event: CustomEvent) => {
-      console.log("[v0] Theme change event received:", event.detail.theme)
       setTheme(event.detail.theme)
     }
 
@@ -27,16 +25,15 @@ export function ThemeEffects({ theme: initialTheme }: ThemeEffectsProps) {
         if (response.ok) {
           const data = await response.json()
           if (data.theme !== theme) {
-            console.log("[v0] Theme change detected via polling:", data.theme)
             setTheme(data.theme)
           }
         }
       } catch (error) {
-        console.error("[v0] Failed to poll theme:", error)
+        // Silently fail - don't spam console
       }
     }
 
-    const pollInterval = setInterval(pollTheme, 10000) // Poll every 10 seconds
+    const pollInterval = setInterval(pollTheme, 10000)
 
     return () => {
       window.removeEventListener("themeChange", handleThemeChange as EventListener)

@@ -10,7 +10,6 @@ function getTransporter() {
   const smtpPassword = process.env.SMTP_PASSWORD
 
   if (!smtpHost || !smtpPort || !smtpUser || !smtpPassword) {
-    console.log("[v0] SMTP not configured, skipping email")
     return null
   }
 
@@ -31,9 +30,8 @@ function getTransporter() {
           rejectUnauthorized: false, // Allow self-signed certificates
         },
       })
-      console.log("[v0] SMTP transporter created successfully")
     } catch (error) {
-      console.error("[v0] Failed to create SMTP transporter:", error)
+      console.error("[Cymatic Group] Failed to create SMTP transporter:", error)
       return null
     }
   }
@@ -45,7 +43,6 @@ export async function sendVerificationEmail(email: string, token: string, userna
   const transport = getTransporter()
 
   if (!transport) {
-    console.log("[v0] Skipping verification email - SMTP not configured")
     return
   }
 
@@ -86,16 +83,15 @@ export async function sendVerificationEmail(email: string, token: string, userna
                 <p>If you didn't create this account, you can safely ignore this email.</p>
               </div>
               <div class="footer">
-                <p>&copy; ${new Date().getFullYear()} Timewave Radio. All rights reserved.</p>
+                <p>&copy; ${new Date().getFullYear()} Cymatic Group. All rights reserved.</p>
               </div>
             </div>
           </body>
         </html>
       `,
     })
-    console.log("[v0] Verification email sent successfully to:", email)
   } catch (error) {
-    console.error("[v0] Failed to send verification email:", error)
+    console.error("[Cymatic Group] Failed to send verification email:", error)
     throw error
   }
 }
@@ -104,7 +100,6 @@ export async function sendNewsletterEmail(subscribers: string[], subject: string
   const transport = getTransporter()
 
   if (!transport) {
-    console.log("[v0] Skipping newsletter email - SMTP not configured")
     return
   }
 
@@ -135,7 +130,7 @@ export async function sendNewsletterEmail(subscribers: string[], subject: string
                   ${content}
                 </div>
                 <div class="footer">
-                  <p>&copy; ${new Date().getFullYear()} Timewave Radio. All rights reserved.</p>
+                  <p>&copy; ${new Date().getFullYear()} Cymatic Group. All rights reserved.</p>
                   <p><a href="${process.env.NEXT_PUBLIC_APP_URL}/unsubscribe">Unsubscribe</a></p>
                 </div>
               </div>
@@ -146,9 +141,8 @@ export async function sendNewsletterEmail(subscribers: string[], subject: string
     )
 
     await Promise.all(mailPromises)
-    console.log("[v0] Newsletter sent to", subscribers.length, "subscribers")
   } catch (error) {
-    console.error("[v0] Failed to send newsletter:", error)
+    console.error("[Cymatic Group] Failed to send newsletter:", error)
     throw error
   }
 }
@@ -168,7 +162,6 @@ export async function sendShowSubmissionEmail(
   const transport = getTransporter()
 
   if (!transport) {
-    console.log("[v0] Skipping show submission email - SMTP not configured")
     return
   }
 
@@ -214,16 +207,15 @@ export async function sendShowSubmissionEmail(
                 </p>
               </div>
               <div class="footer">
-                <p>&copy; ${new Date().getFullYear()} Timewave Radio. All rights reserved.</p>
+                <p>&copy; ${new Date().getFullYear()} Cymatic Group. All rights reserved.</p>
               </div>
             </div>
           </body>
         </html>
       `,
     })
-    console.log("[v0] Show submission email sent to:", adminEmail)
   } catch (error) {
-    console.error("[v0] Failed to send show submission email:", error)
+    console.error("[Cymatic Group] Failed to send show submission email:", error)
   }
 }
 
@@ -242,7 +234,6 @@ export async function sendShowApprovalEmail(
   const transport = getTransporter()
 
   if (!transport) {
-    console.log("[v0] Skipping show approval email - SMTP not configured")
     return
   }
 
@@ -295,16 +286,15 @@ export async function sendShowApprovalEmail(
                 }
               </div>
               <div class="footer">
-                <p>&copy; ${new Date().getFullYear()} Timewave Radio. All rights reserved.</p>
+                <p>&copy; ${new Date().getFullYear()} Cymatic Group. All rights reserved.</p>
               </div>
             </div>
           </body>
         </html>
       `,
     })
-    console.log("[v0] Show approval email sent to:", presenterEmail)
   } catch (error) {
-    console.error("[v0] Failed to send show approval email:", error)
+    console.error("[Cymatic Group] Failed to send show approval email:", error)
   }
 }
 
@@ -320,7 +310,6 @@ export async function sendArticleSubmissionEmail(
   const transport = getTransporter()
 
   if (!transport) {
-    console.log("[v0] Skipping article submission email - SMTP not configured")
     return
   }
 
@@ -362,16 +351,15 @@ export async function sendArticleSubmissionEmail(
                 </p>
               </div>
               <div class="footer">
-                <p>&copy; ${new Date().getFullYear()} Timewave Radio. All rights reserved.</p>
+                <p>&copy; ${new Date().getFullYear()} Cymatic Group. All rights reserved.</p>
               </div>
             </div>
           </body>
         </html>
       `,
     })
-    console.log("[v0] Article submission email sent to:", adminEmail)
   } catch (error) {
-    console.error("[v0] Failed to send article submission email:", error)
+    console.error("[Cymatic Group] Failed to send article submission email:", error)
   }
 }
 
@@ -388,7 +376,6 @@ export async function sendArticleApprovalEmail(
   const transport = getTransporter()
 
   if (!transport) {
-    console.log("[v0] Skipping article approval email - SMTP not configured")
     return
   }
 
@@ -442,15 +429,14 @@ export async function sendArticleApprovalEmail(
                 }
               </div>
               <div class="footer">
-                <p>&copy; ${new Date().getFullYear()} Timewave Radio. All rights reserved.</p>
+                <p>&copy; ${new Date().getFullYear()} Cymatic Group. All rights reserved.</p>
               </div>
             </div>
           </body>
         </html>
       `,
     })
-    console.log("[v0] Article approval email sent to:", authorEmail)
   } catch (error) {
-    console.error("[v0] Failed to send article approval email:", error)
+    console.error("[Cymatic Group] Failed to send article approval email:", error)
   }
 }

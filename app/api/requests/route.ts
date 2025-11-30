@@ -7,6 +7,8 @@ export async function POST(request: Request) {
     const body = await request.json()
     const { song_title, artist_name, message, requester_name } = body
 
+    console.log("[v0] Song request received:", { song_title, artist_name, requester_name })
+
     // Validate required fields
     if (!song_title || !artist_name) {
       return NextResponse.json({ error: "Song title and artist are required" }, { status: 400 })
@@ -22,17 +24,21 @@ export async function POST(request: Request) {
         const { verifyToken } = await import("@/lib/auth")
         const decoded = verifyToken(token)
         userId = decoded.id
+        console.log("[v0] Request from authenticated user:", userId)
       } catch (error) {
         // Not authenticated, that's okay for requests
         console.log("[v0] Request submitted without auth")
       }
     }
 
-    await query(
+    console.log("[v0] Inserting request into database...")
+    const result = await query(
       `INSERT INTO song_requests (user_id, requester_name, song_title, artist_name, message, status)
        VALUES (?, ?, ?, ?, ?, 'pending')`,
       [userId, requester_name || "Anonymous", song_title, artist_name, message || null],
     )
+
+    console.log("[v0] Request inserted successfully:", result)
 
     return NextResponse.json({ success: true, message: "Request submitted successfully" })
   } catch (error) {
@@ -46,6 +52,8 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url)
     const status = searchParams.get("status") || "all"
+
+    console.log("[v0] Fetching requests with status:", status)
 
     let sqlQuery = `
       SELECT sr.*, u.username, u.avatar_url
@@ -63,6 +71,8 @@ export async function GET(request: Request) {
     sqlQuery += ` ORDER BY sr.created_at DESC LIMIT 100`
 
     const requests: any[] = await query(sqlQuery, params)
+
+    console.log("[v0] Fetched requests count:", requests.length)
 
     return NextResponse.json(requests)
   } catch (error) {

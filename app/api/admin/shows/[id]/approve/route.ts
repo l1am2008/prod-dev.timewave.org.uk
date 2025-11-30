@@ -3,7 +3,7 @@ import { query } from "@/lib/db"
 import { requireAdmin } from "@/lib/middleware"
 import { sendShowApprovalEmail } from "@/lib/email"
 
-export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const authCheck = await requireAdmin(request)
 
   if (!authCheck.valid || !authCheck.user) {
@@ -11,7 +11,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
   }
 
   try {
-    const showId = params.id
+    const { id: showId } = await params
     const body = await request.json()
     const { approved, rejection_reason } = body
 

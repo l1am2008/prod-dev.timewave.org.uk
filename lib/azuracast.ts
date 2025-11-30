@@ -47,15 +47,24 @@ export async function fetchNowPlaying(): Promise<NowPlayingData> {
 }
 
 export async function fetchSongHistory(): Promise<SongHistory[]> {
+  console.log("[v0] Fetching from:", `${AZURACAST_BASE_URL}/station/timewave_radio/history`)
+
   const response = await fetch(`${AZURACAST_BASE_URL}/station/timewave_radio/history`, {
     next: { revalidate: 30 }, // Cache for 30 seconds
   })
 
+  console.log("[v0] AzuraCast history response status:", response.status)
+
   if (!response.ok) {
-    throw new Error("Failed to fetch song history")
+    const errorText = await response.text()
+    console.error("[v0] AzuraCast history error response:", errorText)
+    throw new Error(`Failed to fetch song history: ${response.status} ${errorText}`)
   }
 
-  return response.json()
+  const data = await response.json()
+  console.log("[v0] AzuraCast history data structure:", JSON.stringify(data).slice(0, 200))
+
+  return data
 }
 
 export async function createEncoder(username: string, password: string): Promise<{ encoder_id: string }> {

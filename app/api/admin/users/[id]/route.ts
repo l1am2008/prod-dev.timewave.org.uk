@@ -92,3 +92,52 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     return NextResponse.json({ error: "Failed to update user" }, { status: 500 })
   }
 }
+
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
+  const auth = await withAuth(["admin", "super_admin"])(request)
+  if (auth instanceof NextResponse) return auth
+
+  try {
+    // Prevent self-deletion
+    if (String(auth.user.id) === String(id)) {
+      return NextResponse.json({ error: "You cannot delete your own account" }, { status: 400 })
+    }
+
+    // Get user to check if they exist and get their role
+    const users: any[] = await query(
+      "SELECT id, role, encoder_id FROM users LEFT JOIN staff_encoders ON users.id = staff_encoders.user_id WHERE users.id = ?",
+      [id],
+    )
+
+    if (users.length === 0) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 })
+    }
+
+    const user = users[0]
+
+    // Only super_admin can delete admin accounts
+    if (user.role === "admin" && auth.user.role !== "super_admin") {
+      return NextResponse.json({ error: "Only super admins can delete admin accounts" }, { status: 403 })
+    }
+
+    // Delete related records first (foreign key constraints)
+    await query("DELETE FROM user_friends WHERE user_id = ? OR friend_id = ?", [id, id])
+    await query("DELETE FROM active_users WHERE user_id = ?", [id])
+    await query("DELETE FROM password_resets WHERE user_id = ?", [id])
+    await query("DELETE FROM profile_views WHERE viewer_id = ? OR viewed_user_id = ?", [id, id])
+    await query("DELETE FROM song_requests WHERE user_id = ?", [id])
+    await query("DELETE FROM articles WHERE author_id = ?", [id])
+    await query("DELETE FROM shows WHERE user_id = ?", [id])
+    await query("DELETE FROM staff_encoders WHERE user_id = ?", [id])
+    await query("DELETE FROM newsletter_subscribers WHERE user_id = ?", [id])
+
+    // Finally delete the user
+    await query("DELETE FROM users WHERE id = ?", [id])
+
+    return NextResponse.json({ message: "User deleted successfully" })
+  } catch (error) {
+    console.error("Failed to delete user:", error)
+    return NextResponse.json({ error: "Failed to delete user" }, { status: 500 })
+  }
+}

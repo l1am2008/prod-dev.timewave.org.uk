@@ -9,9 +9,20 @@ import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Switch } from "@/components/ui/switch"
-import { ArrowLeft, Save, UserPlus } from "lucide-react"
+import { ArrowLeft, Save, UserPlus, Trash2 } from "lucide-react"
 import Link from "next/link"
 import { useToast } from "@/hooks/use-toast"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 
 interface UserDetails {
   id: number
@@ -38,6 +49,7 @@ export default function UserDetailsPage() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [promoting, setPromoting] = useState(false)
+  const [deleting, setDeleting] = useState(false)
   const [role, setRole] = useState("")
   const [staffRole, setStaffRole] = useState("")
   const [canCreateShows, setCanCreateShows] = useState(false)
@@ -201,6 +213,42 @@ export default function UserDetailsPage() {
     }
   }
 
+  const handleDeleteUser = async () => {
+    setDeleting(true)
+    try {
+      const token = localStorage.getItem("admin_token")
+      const response = await fetch(`/api/admin/users/${params.id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+
+      if (response.ok) {
+        toast({
+          title: "Success",
+          description: "User deleted successfully",
+        })
+        router.push("/admin/users")
+      } else {
+        const data = await response.json()
+        toast({
+          title: "Error",
+          description: data.error || "Failed to delete user",
+          variant: "destructive",
+        })
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete user",
+        variant: "destructive",
+      })
+    } finally {
+      setDeleting(false)
+    }
+  }
+
   if (loading) {
     return <div>Loading...</div>
   }
@@ -217,10 +265,37 @@ export default function UserDetailsPage() {
             <ArrowLeft className="h-4 w-4" />
           </Button>
         </Link>
-        <div>
+        <div className="flex-1">
           <h2 className="text-3xl font-bold">{user.username}</h2>
           <p className="text-muted-foreground">{user.email}</p>
         </div>
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button variant="destructive" disabled={deleting}>
+              <Trash2 className="h-4 w-4 mr-2" />
+              Delete Account
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This action cannot be undone. This will permanently delete the user account for{" "}
+                <span className="font-semibold">{user.username}</span> and remove all associated data including
+                articles, shows, and encoder credentials.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleDeleteUser}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                {deleting ? "Deleting..." : "Delete Account"}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">

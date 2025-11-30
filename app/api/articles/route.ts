@@ -62,9 +62,10 @@ export async function POST(request: NextRequest) {
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/^-+|-+$/g, "")
 
-    const isAdmin = userDetails[0]?.role === "admin" || userDetails[0]?.role === "super_admin"
-    const approvalStatus = isAdmin ? "approved" : "pending"
-    const publishedAt = isAdmin ? new Date() : null
+    const approvalStatus = "pending"
+    const publishedAt = null
+
+    console.log("[v0] Creating article with approval_status:", approvalStatus)
 
     const result: any = await query(
       `INSERT INTO articles (user_id, title, slug, content, excerpt, featured_image, approval_status, published_at)
@@ -72,24 +73,24 @@ export async function POST(request: NextRequest) {
       [user.id, title, slug, content, excerpt, featured_image, approvalStatus, publishedAt],
     )
 
-    if (!isAdmin) {
-      const admins: any[] = await query(`SELECT email, first_name FROM users WHERE role IN ('admin', 'super_admin')`)
+    console.log("[v0] Article created with ID:", result.insertId, "Status: pending")
 
-      const authorName = userDetails[0]?.first_name || user.username
+    const admins: any[] = await query(`SELECT email, first_name FROM users WHERE role IN ('admin', 'super_admin')`)
 
-      for (const admin of admins) {
-        await sendArticleSubmissionEmail(admin.email, admin.first_name || "Admin", {
-          title,
-          authorName,
-          articleId: result.insertId,
-        })
-      }
+    const authorName = userDetails[0]?.first_name || user.username
+
+    for (const admin of admins) {
+      await sendArticleSubmissionEmail(admin.email, admin.first_name || "Admin", {
+        title,
+        authorName,
+        articleId: result.insertId,
+      })
     }
 
     return NextResponse.json({
       success: true,
       articleId: result.insertId,
-      requiresApproval: !isAdmin,
+      requiresApproval: true,
     })
   } catch (error) {
     console.error("[v0] Failed to create article:", error)

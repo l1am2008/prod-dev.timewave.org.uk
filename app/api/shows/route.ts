@@ -49,10 +49,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
     }
 
-    const isAdmin = ["admin", "super_admin"].includes(authCheck.user.role)
-    const approvalStatus = isAdmin ? "approved" : "pending"
-    const approvedBy = isAdmin ? authCheck.user.id : null
-    const approvedAt = isAdmin ? new Date() : null
+    const approvalStatus = "pending"
+    const approvedBy = null
+    const approvedAt = null
+
+    console.log("[v0] Creating show with approval_status:", approvalStatus)
 
     const result: any = await query(
       `INSERT INTO schedule (user_id, title, description, day_of_week, start_time, end_time, is_recurring, approval_status, approved_by, approved_at)
@@ -71,29 +72,28 @@ export async function POST(request: NextRequest) {
       ],
     )
 
-    if (!isAdmin) {
-      const admins: any[] = await query(
-        "SELECT email, first_name, username FROM users WHERE role IN ('admin', 'super_admin')",
-      )
+    console.log("[v0] Show created with ID:", result.insertId, "Status: pending")
 
-      // Send individual email to each admin
-      for (const admin of admins) {
-        await sendShowSubmissionEmail(admin.email, admin.first_name || admin.username, {
-          title,
-          presenterName: authCheck.user.username,
-          dayOfWeek: day_of_week,
-          startTime: start_time,
-          endTime: end_time,
-          description,
-        })
-      }
+    const admins: any[] = await query(
+      "SELECT email, first_name, username FROM users WHERE role IN ('admin', 'super_admin')",
+    )
 
-      console.log(`[v0] Sent show submission notifications to ${admins.length} admins`)
+    for (const admin of admins) {
+      await sendShowSubmissionEmail(admin.email, admin.first_name || admin.username, {
+        title,
+        presenterName: authCheck.user.username,
+        dayOfWeek: day_of_week,
+        startTime: start_time,
+        endTime: end_time,
+        description,
+      })
     }
+
+    console.log(`[v0] Sent show submission notifications to ${admins.length} admins`)
 
     return NextResponse.json({
       id: result.insertId,
-      message: isAdmin ? "Show created and approved" : "Show submitted for approval",
+      message: "Show submitted for approval",
       approvalStatus,
     })
   } catch (error) {

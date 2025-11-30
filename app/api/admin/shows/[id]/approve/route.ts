@@ -15,13 +15,6 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     const body = await request.json()
     const { approved, rejection_reason } = body
 
-    console.log("[v0] Show approval request:", {
-      showId,
-      approved,
-      rejection_reason,
-      adminUserId: authCheck.user.id,
-    })
-
     // Get show details with presenter info
     const shows: any[] = await query(
       `SELECT s.*, u.email, u.first_name, u.username 
@@ -41,14 +34,6 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     const approvedBy = authCheck.user.id || null
     const rejectionReasonValue = rejection_reason || null
 
-    console.log("[v0] Updating show with params:", {
-      approvalStatus,
-      approvedBy,
-      approvedAt: new Date().toISOString(),
-      rejectionReasonValue,
-      showId,
-    })
-
     // Update show approval status
     await query(
       `UPDATE schedule 
@@ -66,13 +51,11 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       rejectionReason: rejection_reason,
     })
 
-    console.log(`[v0] Show ${approved ? "approved" : "rejected"} and email sent to presenter`)
-
     return NextResponse.json({
       message: `Show ${approved ? "approved" : "rejected"} successfully`,
     })
   } catch (error) {
-    console.error("[v0] Failed to approve show:", error)
+    console.error("[Cymatic Group] Failed to approve show:", error)
     return NextResponse.json({ error: "Failed to update show approval" }, { status: 500 })
   }
 }

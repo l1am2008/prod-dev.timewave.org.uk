@@ -41,20 +41,11 @@ export function ThemeEffects({ theme: initialTheme }: ThemeEffectsProps) {
     }
   }, [theme])
 
-  useEffect(() => {
-    if (mounted) {
-      console.log("[v0] Theme updated to:", theme)
-    }
-  }, [theme, mounted])
-
   if (!mounted) return null
 
   if (theme === "default" || !theme) {
-    console.log("[v0] No theme effects active")
     return null
   }
-
-  console.log("[v0] Rendering theme effect:", theme)
 
   return (
     <>
@@ -68,7 +59,6 @@ export function ThemeEffects({ theme: initialTheme }: ThemeEffectsProps) {
 
 function ChristmasEffect() {
   useEffect(() => {
-    // Create snowflakes
     const createSnowflake = () => {
       const snowflake = document.createElement("div")
       snowflake.innerHTML = "❄"

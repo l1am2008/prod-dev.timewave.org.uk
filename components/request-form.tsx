@@ -25,8 +25,6 @@ export function RequestForm() {
     e.preventDefault()
     setLoading(true)
 
-    console.log("[v0] Submitting song request:", formData)
-
     try {
       const token = localStorage.getItem("auth_token")
       const headers: HeadersInit = {
@@ -43,11 +41,8 @@ export function RequestForm() {
         body: JSON.stringify(formData),
       })
 
-      console.log("[v0] Request response status:", response.status)
-
       if (response.ok) {
         const data = await response.json()
-        console.log("[v0] Request submitted successfully:", data)
         toast({
           title: "Request submitted!",
           description: "Your song request has been sent to the DJ.",
@@ -60,7 +55,6 @@ export function RequestForm() {
         })
       } else {
         const error = await response.json()
-        console.error("[v0] Request failed:", error)
         toast({
           title: "Error",
           description: "Failed to submit request. Please try again.",
@@ -68,7 +62,6 @@ export function RequestForm() {
         })
       }
     } catch (error) {
-      console.error("[v0] Request error:", error)
       toast({
         title: "Error",
         description: "Failed to submit request. Please try again.",

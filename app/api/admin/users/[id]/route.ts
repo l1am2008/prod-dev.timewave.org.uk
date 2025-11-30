@@ -4,16 +4,12 @@ import { withAuth } from "@/lib/middleware"
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-  console.log("[v0] Admin user detail request for ID:", id)
 
   try {
     const auth = await withAuth(["admin", "super_admin"])(request)
     if (auth instanceof NextResponse) {
-      console.log("[v0] Auth failed for user detail request")
       return auth
     }
-
-    console.log("[v0] Auth successful, fetching user data...")
 
     const users: any[] = await query(
       `SELECT 
@@ -27,15 +23,13 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       [id],
     )
 
-    console.log("[v0] Query result:", users.length > 0 ? "User found" : "User not found")
-
     if (users.length === 0) {
       return NextResponse.json({ error: "User not found" }, { status: 404 })
     }
 
     return NextResponse.json(users[0])
   } catch (error) {
-    console.error("[v0] Failed to fetch user details:", error)
+    console.error("[Cymatic Group] Failed to fetch user details:", error)
     return NextResponse.json(
       {
         error: "Failed to fetch user",
@@ -55,7 +49,6 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     const body = await request.json()
     const { role, staff_role, is_verified } = body
 
-    // Only super_admin can promote to admin
     if (role === "admin" && auth.user.role !== "super_admin") {
       return NextResponse.json({ error: "Only super admins can promote to admin" }, { status: 403 })
     }
@@ -88,7 +81,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 
     return NextResponse.json({ message: "User updated successfully" })
   } catch (error) {
-    console.error("[v0] Failed to update user:", error)
+    console.error("[Cymatic Group] Failed to update user:", error)
     return NextResponse.json({ error: "Failed to update user" }, { status: 500 })
   }
 }
@@ -99,12 +92,10 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
   if (auth instanceof NextResponse) return auth
 
   try {
-    // Prevent self-deletion
     if (String(auth.user.id) === String(id)) {
       return NextResponse.json({ error: "You cannot delete your own account" }, { status: 400 })
     }
 
-    // Get user to check if they exist and get their role
     const users: any[] = await query(
       "SELECT id, role, encoder_id FROM users LEFT JOIN staff_encoders ON users.id = staff_encoders.user_id WHERE users.id = ?",
       [id],
@@ -116,12 +107,10 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
 
     const user = users[0]
 
-    // Only super_admin can delete admin accounts
     if (user.role === "admin" && auth.user.role !== "super_admin") {
       return NextResponse.json({ error: "Only super admins can delete admin accounts" }, { status: 403 })
     }
 
-    // Delete related records first (foreign key constraints)
     await query("DELETE FROM active_users WHERE user_id = ?", [id])
     await query("DELETE FROM password_resets WHERE user_id = ?", [id])
     await query("DELETE FROM profile_views WHERE viewer_id = ? OR viewed_user_id = ?", [id, id])
@@ -131,12 +120,11 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
     await query("DELETE FROM staff_encoders WHERE user_id = ?", [id])
     await query("DELETE FROM newsletter_subscribers WHERE user_id = ?", [id])
 
-    // Finally delete the user
     await query("DELETE FROM users WHERE id = ?", [id])
 
     return NextResponse.json({ message: "User deleted successfully" })
   } catch (error) {
-    console.error("Failed to delete user:", error)
+    console.error("[Cymatic Group] Failed to delete user:", error)
     return NextResponse.json({ error: "Failed to delete user" }, { status: 500 })
   }
 }

@@ -38,13 +38,12 @@ export async function POST(request: Request) {
             track.duration || null,
           ],
         )
-        console.log("[v0] Synced song to history:", track.song.title)
       }
     }
 
     return NextResponse.json({ success: true, synced: history.length })
   } catch (error) {
-    console.error("[v0] History sync error:", error)
+    console.error("[Cymatic Group] History sync error:", error)
     return NextResponse.json({ error: "Failed to sync history" }, { status: 500 })
   }
 }

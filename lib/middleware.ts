@@ -30,44 +30,34 @@ export async function verifyToken(request: Request): Promise<{ valid: boolean; u
 
     return { valid: true, user }
   } catch (error) {
-    console.error("[v0] verifyToken error:", error)
+    console.error("[Cymatic Group] verifyToken error:", error)
     return { valid: false, user: null }
   }
 }
 
 export function withAuth(allowedRoles: string[]) {
   return async (request: NextRequest) => {
-    console.log("[v0] Auth middleware called for roles:", allowedRoles)
-
     const authHeader = request.headers.get("authorization")
 
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      console.log("[v0] No auth header or invalid format")
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
     const token = authHeader.substring(7)
-    console.log("[v0] Attempting to verify token...")
-
     try {
       const user = jwtVerifyToken(token)
 
       if (!user) {
-        console.log("[v0] Token verification failed")
         return NextResponse.json({ error: "Invalid token" }, { status: 401 })
       }
 
-      console.log("[v0] Token verified for user:", user.id, "Role:", user.role)
-
       if (!allowedRoles.includes(user.role)) {
-        console.log("[v0] User role not authorized:", user.role)
         return NextResponse.json({ error: "Forbidden" }, { status: 403 })
       }
 
-      console.log("[v0] Auth successful")
       return { user }
     } catch (error) {
-      console.error("[v0] Auth middleware error:", error)
+      console.error("[Cymatic Group] Auth middleware error:", error)
       return NextResponse.json({ error: "Authentication failed" }, { status: 401 })
     }
   }
@@ -90,24 +80,28 @@ export async function requireStaff(request: Request) {
   }
 
   if (!token) {
-    return { valid: false, user: null }
+    return { valid: false, user: null, response: NextResponse.json({ error: "Unauthorized" }, { status: 401 }) }
   }
 
   try {
     const user = jwtVerifyToken(token)
 
     if (!user) {
-      return { valid: false, user: null }
+      return { valid: false, user: null, response: NextResponse.json({ error: "Invalid token" }, { status: 401 }) }
     }
 
     if (!["staff", "admin", "super_admin"].includes(user.role)) {
-      return { valid: false, user: null }
+      return { valid: false, user: null, response: NextResponse.json({ error: "Forbidden" }, { status: 403 }) }
     }
 
     return { valid: true, user }
   } catch (error) {
-    console.error("[v0] requireStaff error:", error)
-    return { valid: false, user: null }
+    console.error("[Cymatic Group] requireStaff error:", error)
+    return {
+      valid: false,
+      user: null,
+      response: NextResponse.json({ error: "Authentication failed" }, { status: 401 }),
+    }
   }
 }
 
@@ -128,23 +122,27 @@ export async function requireAdmin(request: Request) {
   }
 
   if (!token) {
-    return { valid: false, user: null }
+    return { valid: false, user: null, response: NextResponse.json({ error: "Unauthorized" }, { status: 401 }) }
   }
 
   try {
     const user = jwtVerifyToken(token)
 
     if (!user) {
-      return { valid: false, user: null }
+      return { valid: false, user: null, response: NextResponse.json({ error: "Invalid token" }, { status: 401 }) }
     }
 
     if (!["admin", "super_admin"].includes(user.role)) {
-      return { valid: false, user: null }
+      return { valid: false, user: null, response: NextResponse.json({ error: "Forbidden" }, { status: 403 }) }
     }
 
     return { valid: true, user }
   } catch (error) {
-    console.error("[v0] requireAdmin error:", error)
-    return { valid: false, user: null }
+    console.error("[Cymatic Group] requireAdmin error:", error)
+    return {
+      valid: false,
+      user: null,
+      response: NextResponse.json({ error: "Authentication failed" }, { status: 401 }),
+    }
   }
 }

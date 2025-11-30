@@ -16,8 +16,6 @@ export async function checkAndUpdateLiveStatus() {
     const isLive = nowPlaying.live.is_live
     const streamerName = nowPlaying.live.streamer_name
 
-    console.log("[v0] Live check:", { isLive, streamerName })
-
     if (isLive && streamerName) {
       // Find the user by streamer name (username)
       const users: any[] = await query(
@@ -43,8 +41,6 @@ export async function checkAndUpdateLiveStatus() {
              VALUES (?, ?, ?)`,
             [user.id, user.encoder_id, nowPlaying.listeners.current],
           )
-
-          console.log("[v0] Started new live session for user:", user.id)
         } else {
           // Update peak listeners if current is higher
           await query(
@@ -66,7 +62,7 @@ export async function checkAndUpdateLiveStatus() {
 
     return { success: true, isLive, streamerName }
   } catch (error) {
-    console.error("[v0] Live detection error:", error)
+    console.error("[Cymatic Group] Live detection error:", error)
     return { success: false, error }
   }
 }
@@ -93,7 +89,7 @@ export async function getCurrentLiveStreamer(): Promise<LiveStreamerInfo | null>
 
     return users[0]
   } catch (error) {
-    console.error("[v0] Failed to get current live streamer:", error)
+    console.error("[Cymatic Group] Failed to get current live streamer:", error)
     return null
   }
 }

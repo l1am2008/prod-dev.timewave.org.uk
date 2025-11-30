@@ -19,41 +19,53 @@ export function SiteHeader() {
   const router = useRouter()
 
   useEffect(() => {
-    const token = localStorage.getItem("auth_token")
-    console.log("[v0] SiteHeader checking auth, token exists:", !!token)
+    const fetchUser = () => {
+      const token = localStorage.getItem("auth_token")
+      if (token) {
+        fetch("/api/auth/me", {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+          .then((res) => {
+            if (!res.ok) {
+              throw new Error("Auth failed")
+            }
+            return res.json()
+          })
+          .then((data) => {
+            if (data.role && data.username) {
+              setUser({ role: data.role, username: data.username })
+            }
+            setLoading(false)
+          })
+          .catch((error) => {
+            localStorage.removeItem("auth_token")
+            setLoading(false)
+          })
+      } else {
+        setLoading(false)
+      }
+    }
 
-    if (token) {
-      fetch("/api/auth/me", {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-        .then((res) => {
-          console.log("[v0] Auth check response status:", res.status)
-          if (!res.ok) {
-            throw new Error("Auth failed")
-          }
-          return res.json()
-        })
-        .then((data) => {
-          console.log("[v0] User data received:", data)
-          if (data.role && data.username) {
-            setUser({ role: data.role, username: data.username })
-          }
-          setLoading(false)
-        })
-        .catch((error) => {
-          console.error("[v0] Auth check failed:", error)
-          localStorage.removeItem("auth_token")
-          setLoading(false)
-        })
-    } else {
-      setLoading(false)
+    fetchUser()
+
+    const handleAuthChange = (event: CustomEvent) => {
+      if (event.detail?.user) {
+        setUser(event.detail.user)
+        setLoading(false)
+      }
+    }
+
+    window.addEventListener("authStateChange", handleAuthChange as EventListener)
+
+    return () => {
+      window.removeEventListener("authStateChange", handleAuthChange as EventListener)
     }
   }, [])
 
   const handleLogout = () => {
-    console.log("[v0] Logging out")
     localStorage.removeItem("auth_token")
     setUser(null)
+    window.dispatchEvent(new CustomEvent("authStateChange", { detail: { user: null } }))
     router.push("/")
     router.refresh()
   }

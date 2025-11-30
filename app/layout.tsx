@@ -9,6 +9,7 @@ import { Toaster } from "@/components/ui/sonner"
 import { ActiveUsersFooter } from "@/components/active-users-footer"
 import { ThemeEffects } from "@/components/theme-effects"
 import { SiteFooter } from "@/components/site-footer"
+import { MobileRedirect } from "@/components/mobile-redirect"
 import { query } from "@/lib/db"
 import "./globals.css"
 
@@ -45,6 +46,7 @@ export default async function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={`font-sans antialiased`}>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
+          <MobileRedirect />
           <SiteHeader />
           <PersistentPlayer />
           {children}

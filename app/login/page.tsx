@@ -38,6 +38,17 @@ export default function LoginPage() {
           localStorage.setItem("admin_token", data.token)
         }
 
+        window.dispatchEvent(
+          new CustomEvent("authStateChange", {
+            detail: {
+              user: {
+                role: data.user.role,
+                username: data.user.username,
+              },
+            },
+          }),
+        )
+
         // Always redirect to homepage
         router.push("/")
 

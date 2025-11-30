@@ -24,18 +24,13 @@ export function SongHistory() {
 
   const fetchHistory = async () => {
     try {
-      console.log("[v0] Fetching song history from API...")
       const response = await fetch("/api/history/track")
-      console.log("[v0] History API response status:", response.status)
       if (response.ok) {
         const data = await response.json()
-        console.log("[v0] History data received:", data.length, "tracks")
         setHistory(data)
-      } else {
-        console.error("[v0] History API returned error:", response.status)
       }
     } catch (error) {
-      console.error("[v0] Failed to fetch history:", error)
+      // Silent fail
     } finally {
       setLoading(false)
     }

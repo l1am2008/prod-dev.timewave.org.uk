@@ -14,12 +14,6 @@ export function getDb() {
       )
     }
 
-    console.log("[v0] Creating database connection pool with:", {
-      host: process.env.DB_HOST,
-      user: process.env.DB_USER,
-      database: process.env.DB_NAME,
-    })
-
     try {
       pool = mysql.createPool({
         host: process.env.DB_HOST,
@@ -38,14 +32,13 @@ export function getDb() {
       pool
         .getConnection()
         .then((connection) => {
-          console.log("[v0] Database connection successful")
           connection.release()
         })
         .catch((error) => {
-          console.error("[v0] Database connection test failed:", error.message)
+          console.error("[Cymatic Group] Database connection test failed:", error.message)
         })
     } catch (error) {
-      console.error("[v0] Failed to create database pool:", error)
+      console.error("[Cymatic Group] Failed to create database pool:", error)
       throw error
     }
   }
@@ -58,7 +51,7 @@ export async function query<T = any>(sql: string, params?: any[]): Promise<T[]> 
     const [rows] = await db.execute(sql, params)
     return rows as T[]
   } catch (error: any) {
-    console.error("[v0] Database query error:", {
+    console.error("[Cymatic Group] Database query error:", {
       message: error.message,
       code: error.code,
       errno: error.errno,

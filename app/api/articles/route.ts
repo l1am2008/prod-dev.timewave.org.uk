@@ -65,15 +65,11 @@ export async function POST(request: NextRequest) {
     const approvalStatus = "pending"
     const publishedAt = null
 
-    console.log("[v0] Creating article with approval_status:", approvalStatus)
-
     const result: any = await query(
       `INSERT INTO articles (user_id, title, slug, content, excerpt, featured_image, approval_status, published_at)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
       [user.id, title, slug, content, excerpt, featured_image, approvalStatus, publishedAt],
     )
-
-    console.log("[v0] Article created with ID:", result.insertId, "Status: pending")
 
     const admins: any[] = await query(`SELECT email, first_name FROM users WHERE role IN ('admin', 'super_admin')`)
 
@@ -93,7 +89,7 @@ export async function POST(request: NextRequest) {
       requiresApproval: true,
     })
   } catch (error) {
-    console.error("[v0] Failed to create article:", error)
+    console.error("[Cymatic Group] Failed to create article:", error)
     return NextResponse.json({ error: "Failed to create article" }, { status: 500 })
   }
 }

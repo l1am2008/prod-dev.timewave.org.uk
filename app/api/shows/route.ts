@@ -36,7 +36,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
-  // Check if user is staff or admin
   if (!["staff", "admin", "super_admin"].includes(authCheck.user.role)) {
     return NextResponse.json({ error: "Only staff and admins can create shows" }, { status: 403 })
   }
@@ -52,8 +51,6 @@ export async function POST(request: NextRequest) {
     const approvalStatus = "pending"
     const approvedBy = null
     const approvedAt = null
-
-    console.log("[v0] Creating show with approval_status:", approvalStatus)
 
     const result: any = await query(
       `INSERT INTO schedule (user_id, title, description, day_of_week, start_time, end_time, is_recurring, approval_status, approved_by, approved_at)
@@ -72,8 +69,6 @@ export async function POST(request: NextRequest) {
       ],
     )
 
-    console.log("[v0] Show created with ID:", result.insertId, "Status: pending")
-
     const admins: any[] = await query(
       "SELECT email, first_name, username FROM users WHERE role IN ('admin', 'super_admin')",
     )
@@ -89,15 +84,13 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    console.log(`[v0] Sent show submission notifications to ${admins.length} admins`)
-
     return NextResponse.json({
       id: result.insertId,
       message: "Show submitted for approval",
       approvalStatus,
     })
   } catch (error) {
-    console.error("[v0] Failed to create show:", error)
+    console.error("[Cymatic Group] Failed to create show:", error)
     return NextResponse.json({ error: "Failed to create show" }, { status: 500 })
   }
 }

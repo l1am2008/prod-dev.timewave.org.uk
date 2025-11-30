@@ -4,9 +4,7 @@ import { verifyToken } from "@/lib/middleware"
 
 export async function GET(request: Request) {
   try {
-    console.log("[v0] Profile GET: Starting...")
     const authResult = await verifyToken(request)
-    console.log("[v0] Profile GET: Auth result:", authResult.valid, authResult.user?.id)
 
     if (!authResult.valid || !authResult.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
@@ -17,8 +15,6 @@ export async function GET(request: Request) {
        FROM users WHERE id = ?`,
       [authResult.user.id],
     )
-
-    console.log("[v0] Profile GET: Query result:", users.length > 0 ? "found" : "not found")
 
     if (users.length === 0) {
       return NextResponse.json({ error: "User not found" }, { status: 404 })
@@ -35,7 +31,7 @@ export async function GET(request: Request) {
       favorite_song_artwork: user.favorite_song_artwork || null,
     })
   } catch (error) {
-    console.error("[v0] Profile fetch error:", error)
+    console.error("[Cymatic Group] Profile fetch error:", error)
     return NextResponse.json(
       {
         error: "Failed to fetch profile",
@@ -110,7 +106,7 @@ export async function PATCH(request: Request) {
 
     return NextResponse.json({ message: "Profile updated successfully" })
   } catch (error) {
-    console.error("[v0] Profile update error:", error)
+    console.error("[Cymatic Group] Profile update error:", error)
     return NextResponse.json({ error: "Failed to update profile" }, { status: 500 })
   }
 }

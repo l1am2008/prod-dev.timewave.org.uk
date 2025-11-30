@@ -4,12 +4,7 @@ import { fetchSongHistory } from "@/lib/azuracast"
 // Get recent history from AzuraCast
 export async function GET() {
   try {
-    console.log("[v0] Fetching song history from AzuraCast...")
-
     const history = await fetchSongHistory()
-
-    console.log("[v0] AzuraCast history fetched:", history.length, "tracks")
-
     const recentHistory = history.slice(0, 5)
 
     // Transform the data to match the expected format
@@ -23,7 +18,7 @@ export async function GET() {
 
     return NextResponse.json(formattedHistory)
   } catch (error) {
-    console.error("[v0] Failed to fetch song history from AzuraCast:", error)
+    console.error("[Cymatic Group] Failed to fetch song history from AzuraCast:", error)
     return NextResponse.json({ error: "Failed to fetch history" }, { status: 500 })
   }
 }

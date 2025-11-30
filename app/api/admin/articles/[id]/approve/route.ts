@@ -3,11 +3,12 @@ import { query } from "@/lib/db"
 import { requireAdmin } from "@/lib/middleware"
 import { sendArticleApprovalEmail } from "@/lib/email"
 
-export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const authCheck = await requireAdmin(request)
   if (!authCheck.valid) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
   try {
+    const { id } = await params
     const { action, rejection_reason } = await request.json()
     const adminId = authCheck.user!.id
 
@@ -15,7 +16,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
       `SELECT a.*, u.email, u.first_name FROM articles a
       INNER JOIN users u ON a.user_id = u.id
       WHERE a.id = ?`,
-      [params.id],
+      [id],
     )
 
     if (articles.length === 0) {
@@ -29,7 +30,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
         `UPDATE articles 
         SET approval_status = 'approved', approved_by = ?, approved_at = NOW(), published_at = NOW()
         WHERE id = ?`,
-        [adminId, params.id],
+        [adminId, id],
       )
 
       await sendArticleApprovalEmail(article.email, article.first_name || "there", {
@@ -42,7 +43,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
         `UPDATE articles 
         SET approval_status = 'rejected', rejection_reason = ?
         WHERE id = ?`,
-        [rejection_reason, params.id],
+        [rejection_reason, id],
       )
 
       await sendArticleApprovalEmail(article.email, article.first_name || "there", {

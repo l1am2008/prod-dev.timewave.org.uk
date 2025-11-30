@@ -15,6 +15,13 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     const body = await request.json()
     const { approved, rejection_reason } = body
 
+    console.log("[v0] Show approval request:", {
+      showId,
+      approved,
+      rejection_reason,
+      adminUserId: authCheck.user.id,
+    })
+
     // Get show details with presenter info
     const shows: any[] = await query(
       `SELECT s.*, u.email, u.first_name, u.username 
@@ -31,12 +38,23 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     const show = shows[0]
     const approvalStatus = approved ? "approved" : "rejected"
 
+    const approvedBy = authCheck.user.id || null
+    const rejectionReasonValue = rejection_reason || null
+
+    console.log("[v0] Updating show with params:", {
+      approvalStatus,
+      approvedBy,
+      approvedAt: new Date().toISOString(),
+      rejectionReasonValue,
+      showId,
+    })
+
     // Update show approval status
     await query(
       `UPDATE schedule 
        SET approval_status = ?, approved_by = ?, approved_at = ?, rejection_reason = ?
        WHERE id = ?`,
-      [approvalStatus, authCheck.user.id, new Date(), rejection_reason || null, showId],
+      [approvalStatus, approvedBy, new Date(), rejectionReasonValue, showId],
     )
 
     await sendShowApprovalEmail(show.email, show.first_name || show.username, {

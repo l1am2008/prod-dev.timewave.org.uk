@@ -25,7 +25,15 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
-    const token = request.cookies.get("auth_token")?.value
+    let token = request.cookies.get("auth_token")?.value
+
+    if (!token) {
+      const authHeader = request.headers.get("authorization")
+      if (authHeader?.startsWith("Bearer ")) {
+        token = authHeader.substring(7)
+      }
+    }
+
     if (!token) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }

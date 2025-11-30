@@ -59,7 +59,7 @@ export function ActiveUsersFooter() {
   if (activeUsers.length === 0) return null
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 border-t border-border bg-card z-30">
+    <div className="relative bottom-0 left-0 right-0 border-t border-border bg-card z-30 mb-0">
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2 text-sm font-medium">
@@ -86,7 +86,6 @@ export function ActiveUsersFooter() {
                     <span className="text-sm font-semibold">{user.username.charAt(0).toUpperCase()}</span>
                   </div>
                 )}
-                {/* Active indicator dot */}
                 <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-background"></span>
               </div>
             ))}

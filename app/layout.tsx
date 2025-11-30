@@ -8,6 +8,7 @@ import { SiteHeader } from "@/components/site-header"
 import { Toaster } from "@/components/ui/sonner"
 import { ActiveUsersFooter } from "@/components/active-users-footer"
 import { ThemeEffects } from "@/components/theme-effects"
+import { query } from "@/lib/db"
 import "./globals.css"
 
 const _geist = Geist({ subsets: ["latin"] })
@@ -24,24 +25,14 @@ export const metadata: Metadata = {
 
 async function getActiveTheme() {
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000"
-    console.log("[v0] Fetching theme from:", `${baseUrl}/api/admin/settings/theme`)
+    console.log("[v0] Fetching theme directly from database")
+    const result = await query("SELECT setting_value FROM site_settings WHERE setting_key = 'active_theme'")
 
-    const response = await fetch(`${baseUrl}/api/admin/settings/theme`, {
-      cache: "no-store",
-      next: { revalidate: 0 },
-    })
-
-    if (!response.ok) {
-      console.error("[v0] Theme fetch failed with status:", response.status)
-      return "default"
-    }
-
-    const data = await response.json()
-    console.log("[v0] Active theme:", data.theme)
-    return data.theme || "default"
+    const theme = result.length > 0 ? result[0].setting_value : "default"
+    console.log("[v0] Active theme from DB:", theme)
+    return theme
   } catch (error) {
-    console.error("[v0] Failed to fetch theme:", error)
+    console.error("[v0] Failed to fetch theme from database:", error)
     return "default"
   }
 }

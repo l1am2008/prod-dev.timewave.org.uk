@@ -12,8 +12,8 @@ export async function GET() {
 
     return NextResponse.json({ theme })
   } catch (error) {
-    console.error("[v0] Failed to fetch theme:", error)
-    return NextResponse.json({ theme: "default" })
+    console.error("[v0] Failed to fetch theme (table may not exist):", error)
+    return NextResponse.json({ theme: "default" }, { status: 200 })
   }
 }
 

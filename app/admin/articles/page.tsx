@@ -29,8 +29,10 @@ export default function AdminArticlesPage() {
 
   const fetchArticles = async (status: string) => {
     try {
+      const token = localStorage.getItem("auth_token")
       const response = await fetch(`/api/admin/articles?status=${status}`, {
         credentials: "include",
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
       })
       const data = await response.json()
       setArticles(data.articles || [])
@@ -42,9 +44,13 @@ export default function AdminArticlesPage() {
   const handleApprove = async (articleId: number) => {
     setIsProcessing(true)
     try {
+      const token = localStorage.getItem("auth_token")
       const response = await fetch(`/api/admin/articles/${articleId}/approve`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
         credentials: "include",
         body: JSON.stringify({ action: "approve" }),
       })
@@ -67,9 +73,13 @@ export default function AdminArticlesPage() {
 
     setIsProcessing(true)
     try {
+      const token = localStorage.getItem("auth_token")
       const response = await fetch(`/api/admin/articles/${selectedArticle.id}/approve`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
         credentials: "include",
         body: JSON.stringify({ action: "reject", rejection_reason: rejectionReason }),
       })

@@ -1,10 +1,23 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { query } from "@/lib/db"
-import { requireAdmin } from "@/lib/middleware"
+import { verifyToken } from "@/lib/auth"
 
 export async function GET(request: NextRequest) {
-  const authCheck = await requireAdmin(request)
-  if (!authCheck.valid) {
+  let token = request.cookies.get("auth_token")?.value
+
+  if (!token) {
+    const authHeader = request.headers.get("authorization")
+    if (authHeader?.startsWith("Bearer ")) {
+      token = authHeader.substring(7)
+    }
+  }
+
+  if (!token) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  }
+
+  const decoded = await verifyToken(token)
+  if (!decoded || (decoded.role !== "admin" && decoded.role !== "super_admin")) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 

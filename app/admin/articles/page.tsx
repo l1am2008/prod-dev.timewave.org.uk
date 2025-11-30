@@ -99,6 +99,35 @@ export default function AdminArticlesPage() {
     }
   }
 
+  const handleDelete = async (articleId: number) => {
+    if (!confirm("Are you sure you want to permanently delete this article?")) {
+      return
+    }
+
+    setIsProcessing(true)
+    try {
+      const token = localStorage.getItem("auth_token")
+      const response = await fetch(`/api/admin/articles/${articleId}/delete`, {
+        method: "DELETE",
+        headers: {
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        credentials: "include",
+      })
+
+      if (response.ok) {
+        toast({ title: "Success", description: "Article deleted permanently" })
+        fetchArticles(activeTab)
+      } else {
+        toast({ title: "Error", description: "Failed to delete article", variant: "destructive" })
+      }
+    } catch (error) {
+      toast({ title: "Error", description: "Failed to delete article", variant: "destructive" })
+    } finally {
+      setIsProcessing(false)
+    }
+  }
+
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-6">Manage Articles</h1>
@@ -135,21 +164,32 @@ export default function AdminArticlesPage() {
                           {article.excerpt && <p className="text-sm mt-2">{article.excerpt}</p>}
                         </div>
                       </div>
-                      {activeTab === "pending" && (
-                        <div className="flex gap-2 mt-4">
-                          <Button size="sm" onClick={() => handleApprove(article.id)} disabled={isProcessing}>
-                            Approve
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="destructive"
-                            onClick={() => setSelectedArticle(article)}
-                            disabled={isProcessing}
-                          >
-                            Reject
-                          </Button>
-                        </div>
-                      )}
+                      <div className="flex gap-2 mt-4">
+                        {activeTab === "pending" && (
+                          <>
+                            <Button size="sm" onClick={() => handleApprove(article.id)} disabled={isProcessing}>
+                              Approve
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="destructive"
+                              onClick={() => setSelectedArticle(article)}
+                              disabled={isProcessing}
+                            >
+                              Reject
+                            </Button>
+                          </>
+                        )}
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="text-destructive hover:bg-destructive hover:text-destructive-foreground bg-transparent"
+                          onClick={() => handleDelete(article.id)}
+                          disabled={isProcessing}
+                        >
+                          Delete
+                        </Button>
+                      </div>
                     </div>
                   ))}
                 </div>

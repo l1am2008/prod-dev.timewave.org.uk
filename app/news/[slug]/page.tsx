@@ -2,6 +2,9 @@ import { query } from "@/lib/db"
 import Link from "next/link"
 import { notFound } from "next/navigation"
 
+export const dynamic = "force-dynamic"
+export const revalidate = 0
+
 async function getArticle(slug: string) {
   try {
     const articles: any[] = await query(
@@ -21,8 +24,8 @@ async function getArticle(slug: string) {
   }
 }
 
-export default async function ArticlePage({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params
+export default async function ArticlePage({ params }: { params: { slug: string } }) {
+  const { slug } = params
   const article = await getArticle(slug)
 
   if (!article) {

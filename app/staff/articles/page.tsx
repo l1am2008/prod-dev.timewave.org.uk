@@ -31,7 +31,10 @@ export default function StaffArticlesPage() {
 
   const checkPermissions = async () => {
     try {
-      const response = await fetch("/api/user/permissions")
+      const token = localStorage.getItem("auth_token")
+      const response = await fetch("/api/user/permissions", {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      })
       const data = await response.json()
       setCanCreateArticles(data.can_create_articles)
     } catch (error) {
@@ -41,7 +44,10 @@ export default function StaffArticlesPage() {
 
   const fetchArticles = async () => {
     try {
-      const response = await fetch("/api/staff/articles")
+      const token = localStorage.getItem("auth_token")
+      const response = await fetch("/api/staff/articles", {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      })
       const data = await response.json()
       setArticles(data.articles || [])
     } catch (error) {
@@ -54,9 +60,13 @@ export default function StaffArticlesPage() {
     setIsSubmitting(true)
 
     try {
+      const token = localStorage.getItem("auth_token")
       const response = await fetch("/api/articles", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
         body: JSON.stringify(formData),
       })
 

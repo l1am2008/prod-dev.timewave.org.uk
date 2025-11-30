@@ -97,32 +97,32 @@ export default function EncoderPage() {
                 <Button
                   size="sm"
                   variant="ghost"
-                  onClick={() => copyToClipboard("https://admin.stream.timewave.org.uk", "Server URL")}
+                  onClick={() => copyToClipboard("admin.stream.timewave.org.uk", "Server URL")}
                 >
                   <Copy className="h-4 w-4" />
                 </Button>
               </div>
-              <code className="text-sm">https://admin.stream.timewave.org.uk</code>
+              <code className="text-sm">admin.stream.timewave.org.uk</code>
             </div>
 
             <div className="p-4 bg-muted rounded-lg">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-medium">Port</span>
-                <Button size="sm" variant="ghost" onClick={() => copyToClipboard("8000", "Port")}>
+                <Button size="sm" variant="ghost" onClick={() => copyToClipboard("8005", "Port")}>
                   <Copy className="h-4 w-4" />
                 </Button>
               </div>
-              <code className="text-sm">8000</code>
+              <code className="text-sm">8005</code>
             </div>
 
             <div className="p-4 bg-muted rounded-lg">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-medium">Mount Point</span>
-                <Button size="sm" variant="ghost" onClick={() => copyToClipboard("/timewave_radio", "Mount Point")}>
+                <Button size="sm" variant="ghost" onClick={() => copyToClipboard("/", "Mount Point")}>
                   <Copy className="h-4 w-4" />
                 </Button>
               </div>
-              <code className="text-sm">/timewave_radio</code>
+              <code className="text-sm">/</code>
             </div>
 
             <div className="p-4 bg-muted rounded-lg">
@@ -164,10 +164,6 @@ export default function EncoderPage() {
         </CardHeader>
         <CardContent>
           <ul className="space-y-2 text-sm">
-            <li className="flex items-start gap-2">
-              <span className="font-medium min-w-[80px]">OBS Studio:</span>
-              <span className="text-muted-foreground">Professional streaming software with advanced features</span>
-            </li>
             <li className="flex items-start gap-2">
               <span className="font-medium min-w-[80px]">Mixxx:</span>
               <span className="text-muted-foreground">DJ software with built-in broadcasting capabilities</span>

@@ -6,13 +6,28 @@ interface ThemeEffectsProps {
   theme: string
 }
 
-export function ThemeEffects({ theme }: ThemeEffectsProps) {
+export function ThemeEffects({ theme: initialTheme }: ThemeEffectsProps) {
   const [mounted, setMounted] = useState(false)
+  const [theme, setTheme] = useState(initialTheme)
 
   useEffect(() => {
     setMounted(true)
     console.log("[v0] Theme effects mounted with theme:", theme)
-  }, [theme])
+
+    const handleThemeChange = (event: CustomEvent) => {
+      console.log("[v0] Theme change event received:", event.detail.theme)
+      setTheme(event.detail.theme)
+    }
+
+    window.addEventListener("themeChange", handleThemeChange as EventListener)
+    return () => window.removeEventListener("themeChange", handleThemeChange as EventListener)
+  }, [])
+
+  useEffect(() => {
+    if (mounted) {
+      console.log("[v0] Theme updated to:", theme)
+    }
+  }, [theme, mounted])
 
   if (!mounted) return null
 

@@ -71,7 +71,9 @@ export default function AdminSettingsPage() {
 
       if (response.ok) {
         setActiveTheme(theme)
-        toast.success("Theme updated successfully! Refresh the page to see changes.")
+        window.dispatchEvent(new CustomEvent("themeChange", { detail: { theme } }))
+        router.refresh()
+        toast.success("Theme updated successfully!")
       } else {
         const error = await response.json()
         toast.error(error.error || "Failed to update theme")

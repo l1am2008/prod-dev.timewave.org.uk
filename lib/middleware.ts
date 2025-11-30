@@ -2,13 +2,24 @@ import { type NextRequest, NextResponse } from "next/server"
 import { verifyToken as jwtVerifyToken, type UserPayload } from "./auth"
 
 export async function verifyToken(request: Request): Promise<{ valid: boolean; user: UserPayload | null }> {
-  const authHeader = request.headers.get("authorization")
+  let token: string | null = null
 
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return { valid: false, user: null }
+  // Try Authorization header first
+  const authHeader = request.headers.get("authorization")
+  if (authHeader && authHeader.startsWith("Bearer ")) {
+    token = authHeader.substring(7)
   }
 
-  const token = authHeader.substring(7)
+  // Fallback to cookies if no Authorization header
+  if (!token && "cookies" in request) {
+    const cookieStore = (request as any).cookies
+    const authCookie = cookieStore.get("auth_token")
+    token = authCookie?.value || null
+  }
+
+  if (!token) {
+    return { valid: false, user: null }
+  }
 
   try {
     const user = jwtVerifyToken(token)
@@ -63,13 +74,24 @@ export function withAuth(allowedRoles: string[]) {
 }
 
 export async function requireStaff(request: Request) {
-  const authHeader = request.headers.get("authorization")
+  let token: string | null = null
 
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return { valid: false, user: null }
+  // Try Authorization header first
+  const authHeader = request.headers.get("authorization")
+  if (authHeader && authHeader.startsWith("Bearer ")) {
+    token = authHeader.substring(7)
   }
 
-  const token = authHeader.substring(7)
+  // Fallback to cookies if no Authorization header
+  if (!token && "cookies" in request) {
+    const cookieStore = (request as any).cookies
+    const authCookie = cookieStore.get("auth_token")
+    token = authCookie?.value || null
+  }
+
+  if (!token) {
+    return { valid: false, user: null }
+  }
 
   try {
     const user = jwtVerifyToken(token)
@@ -90,13 +112,24 @@ export async function requireStaff(request: Request) {
 }
 
 export async function requireAdmin(request: Request) {
-  const authHeader = request.headers.get("authorization")
+  let token: string | null = null
 
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return { valid: false, user: null }
+  // Try Authorization header first
+  const authHeader = request.headers.get("authorization")
+  if (authHeader && authHeader.startsWith("Bearer ")) {
+    token = authHeader.substring(7)
   }
 
-  const token = authHeader.substring(7)
+  // Fallback to cookies if no Authorization header
+  if (!token && "cookies" in request) {
+    const cookieStore = (request as any).cookies
+    const authCookie = cookieStore.get("auth_token")
+    token = authCookie?.value || null
+  }
+
+  if (!token) {
+    return { valid: false, user: null }
+  }
 
   try {
     const user = jwtVerifyToken(token)

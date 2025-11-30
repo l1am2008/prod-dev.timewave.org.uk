@@ -10,8 +10,10 @@ export async function GET() {
 
     console.log("[v0] AzuraCast history fetched:", history.length, "tracks")
 
+    const recentHistory = history.slice(0, 5)
+
     // Transform the data to match the expected format
-    const formattedHistory = history.map((item) => ({
+    const formattedHistory = recentHistory.map((item) => ({
       song_title: item.song.title,
       song_artist: item.song.artist,
       song_album: item.song.album,

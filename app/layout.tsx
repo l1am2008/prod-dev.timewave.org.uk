@@ -24,15 +24,24 @@ export const metadata: Metadata = {
 
 async function getActiveTheme() {
   try {
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000"}/api/admin/settings/theme`,
-      {
-        cache: "no-store",
-      },
-    )
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000"
+    console.log("[v0] Fetching theme from:", `${baseUrl}/api/admin/settings/theme`)
+
+    const response = await fetch(`${baseUrl}/api/admin/settings/theme`, {
+      cache: "no-store",
+      next: { revalidate: 0 },
+    })
+
+    if (!response.ok) {
+      console.error("[v0] Theme fetch failed with status:", response.status)
+      return "default"
+    }
+
     const data = await response.json()
+    console.log("[v0] Active theme:", data.theme)
     return data.theme || "default"
   } catch (error) {
+    console.error("[v0] Failed to fetch theme:", error)
     return "default"
   }
 }

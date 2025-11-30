@@ -11,9 +11,17 @@ export function ThemeEffects({ theme }: ThemeEffectsProps) {
 
   useEffect(() => {
     setMounted(true)
-  }, [])
+    console.log("[v0] Theme effects mounted with theme:", theme)
+  }, [theme])
 
   if (!mounted) return null
+
+  if (theme === "default" || !theme) {
+    console.log("[v0] No theme effects active")
+    return null
+  }
+
+  console.log("[v0] Rendering theme effect:", theme)
 
   return (
     <>

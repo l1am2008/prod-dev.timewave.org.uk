@@ -7,6 +7,7 @@ import { PersistentPlayer } from "@/components/persistent-player"
 import { SiteHeader } from "@/components/site-header"
 import { Toaster } from "@/components/ui/sonner"
 import { ActiveUsersFooter } from "@/components/active-users-footer"
+import { ThemeEffects } from "@/components/theme-effects"
 import "./globals.css"
 
 const _geist = Geist({ subsets: ["latin"] })
@@ -21,11 +22,28 @@ export const metadata: Metadata = {
     generator: 'v0.app'
 }
 
-export default function RootLayout({
+async function getActiveTheme() {
+  try {
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000"}/api/admin/settings/theme`,
+      {
+        cache: "no-store",
+      },
+    )
+    const data = await response.json()
+    return data.theme || "default"
+  } catch (error) {
+    return "default"
+  }
+}
+
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  const activeTheme = await getActiveTheme()
+
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`font-sans antialiased`}>
@@ -34,6 +52,7 @@ export default function RootLayout({
           <PersistentPlayer />
           {children}
           <ActiveUsersFooter />
+          <ThemeEffects theme={activeTheme} />
           <Toaster />
         </ThemeProvider>
         <Analytics />

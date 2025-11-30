@@ -50,6 +50,9 @@ export async function fetchSongHistory(): Promise<SongHistory[]> {
   console.log("[v0] Fetching from:", `${AZURACAST_BASE_URL}/station/timewave_radio/history`)
 
   const response = await fetch(`${AZURACAST_BASE_URL}/station/timewave_radio/history`, {
+    headers: {
+      "X-API-Key": AZURACAST_API_KEY || "",
+    },
     next: { revalidate: 30 }, // Cache for 30 seconds
   })
 

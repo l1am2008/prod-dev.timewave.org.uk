@@ -20,8 +20,29 @@ export function ThemeEffects({ theme: initialTheme }: ThemeEffectsProps) {
     }
 
     window.addEventListener("themeChange", handleThemeChange as EventListener)
-    return () => window.removeEventListener("themeChange", handleThemeChange as EventListener)
-  }, [])
+
+    const pollTheme = async () => {
+      try {
+        const response = await fetch("/api/admin/settings/theme")
+        if (response.ok) {
+          const data = await response.json()
+          if (data.theme !== theme) {
+            console.log("[v0] Theme change detected via polling:", data.theme)
+            setTheme(data.theme)
+          }
+        }
+      } catch (error) {
+        console.error("[v0] Failed to poll theme:", error)
+      }
+    }
+
+    const pollInterval = setInterval(pollTheme, 10000) // Poll every 10 seconds
+
+    return () => {
+      window.removeEventListener("themeChange", handleThemeChange as EventListener)
+      clearInterval(pollInterval)
+    }
+  }, [theme])
 
   useEffect(() => {
     if (mounted) {

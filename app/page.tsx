@@ -4,7 +4,6 @@ import { CardHeader } from "@/components/ui/card"
 import { Card } from "@/components/ui/card"
 import { SongHistory } from "@/components/song-history"
 import { RequestForm } from "@/components/request-form"
-import { ActiveUsersFooter } from "@/components/active-users-footer"
 import { UpcomingShows } from "@/components/upcoming-shows"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
@@ -189,8 +188,6 @@ export default async function HomePage() {
           <RequestForm />
         </div>
       </main>
-
-      <ActiveUsersFooter />
     </div>
   )
 }

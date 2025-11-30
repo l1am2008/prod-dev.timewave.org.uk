@@ -6,6 +6,7 @@ import { ThemeProvider } from "@/components/theme-provider"
 import { PersistentPlayer } from "@/components/persistent-player"
 import { SiteHeader } from "@/components/site-header"
 import { Toaster } from "@/components/ui/sonner"
+import { ActiveUsersFooter } from "@/components/active-users-footer"
 import "./globals.css"
 
 const _geist = Geist({ subsets: ["latin"] })
@@ -32,6 +33,7 @@ export default function RootLayout({
           <SiteHeader />
           <PersistentPlayer />
           {children}
+          <ActiveUsersFooter />
           <Toaster />
         </ThemeProvider>
         <Analytics />

@@ -5,7 +5,18 @@ import { verifyToken } from "@/lib/auth"
 export async function GET(request: NextRequest) {
   try {
     console.log("[v0] Staff articles API called")
-    const token = request.cookies.get("auth_token")?.value
+    let token = request.cookies.get("auth_token")?.value
+
+    if (!token) {
+      const authHeader = request.headers.get("authorization")
+      if (authHeader?.startsWith("Bearer ")) {
+        token = authHeader.substring(7)
+        console.log("[v0] Token found in Authorization header")
+      }
+    } else {
+      console.log("[v0] Token found in cookies")
+    }
+
     console.log("[v0] Auth token present:", !!token)
 
     if (!token) {
